@@ -1,0 +1,35 @@
+General Background
+In DHL Logistics Operations, shipment exceptions happen daily due to multiple reasons such as missing information, system validation failures, incorrect routing, or customer-provided errors. These exceptions are usually picked up by the operations team either through system alerts, emails, or messages from supervisors. Because different teams handle exceptions differently, the steps documented here are inconsistent and sometimes incomplete.
+Most of the time, agents rely on chat messages, emails, or screenshots instead of a standardized SOP. This leads to delays, repeated mistakes, and inconsistent customer communication. The notes below come from MS Teams chats, emails, informal training notes, and system error screenshots.
+
+
+Common Shipment Exception Types Observed
+Based on recent discussions and incidents, the most common shipment exception types include:
+•	Invalid routing code
+•	Missing or incorrect customer address
+•	Incorrect country or postcode mapping
+•	Weight or dimension mismatch
+•	Duplicate shipment reference
+•	System authorization errors
+•	POD upload failures
+Different resolutions were applied by different agents, often without proper documentation.
+
+
+
+
+Informal Step-by-Step Notes 
+When shipment exception appears, first check the exact error message.
+1.	Do not immediately escalate to IT without basic checks.
+2.	Verify customer address (postcode, city, country).
+3.	Confirm weight and dimensions are realistic.
+4.	Refresh booking screen and retry.
+5.	If still failing, take screenshot and escalate.
+No official timeline or escalation matrix was included.
+
+Known Gaps and Issues Identified
+•	No single standardized SOP exists for shipment exceptions.
+•	Resolution steps vary by agent and team.
+•	Critical steps are hidden in chat messages and emails.
+•	New joiners rely heavily on experienced staff instead of documentation.
+•	Repeated errors occur because learnings are not captured formally.
+

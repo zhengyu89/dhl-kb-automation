@@ -1,0 +1,174 @@
+Customer Credit Approval and New Customer Onboarding Process
+Document Status: Draft (Unstandardized)
+Business Unit: DHL Logistics Operations
+Process Owner: Operations & Finance
+Last Updated: Not maintained consistently
+________________________________________
+1. Purpose
+The purpose of this Standard Operating Procedure (SOP) is to document the end-to-end process for new customer onboarding with credit approval in DHL Logistics Operations. This SOP aims to explain how new customers are set up in operational and financial systems, how credit checks are conducted, and how approvals or rejections are handled.
+Currently, this process is handled through a mix of emails, spreadsheets, informal instructions, and experience-based knowledge. This document consolidates existing practices but has not been fully standardized. The intention is to later refine this SOP into a clean and official knowledge article.
+________________________________________
+2. Scope
+This SOP applies to:
+•	Operations teams
+•	Customer Service teams
+•	Finance and Credit Control teams
+•	Supervisors and Managers involved in customer onboarding
+This SOP covers:
+•	New customer request intake
+•	Credit evaluation and approval
+•	System setup
+•	Communication with stakeholders
+It does not cover customer contract negotiation or legal agreement signing.
+________________________________________
+3. Definitions and Abbreviations
+•	CRM – Customer Relationship Management system
+•	SAP – Enterprise Resource Planning system used for billing and finance
+•	Credit Limit – Maximum allowed outstanding amount for a customer
+•	Cash Customer – Customer required to prepay before shipment
+•	Credit Customer – Customer allowed to ship and pay later based on approved credit terms
+________________________________________
+4. Roles and Responsibilities
+4.1 Sales Team
+•	Submit new customer onboarding request
+•	Provide complete customer information
+•	Support clarifications during credit review
+4.2 Operations Team
+•	Validate onboarding request completeness
+•	Coordinate with Finance for system setup
+•	Ensure customer is ready for operational use
+4.3 Finance / Credit Control Team
+•	Perform credit checks
+•	Approve or reject credit requests
+•	Set credit terms and limits in SAP
+4.4 Management
+•	Approve exceptional cases
+•	Resolve escalations and delays
+________________________________________
+5. Process Overview
+The new customer onboarding and credit approval process consists of the following high-level steps:
+1.	New customer request received
+2.	Initial validation of request
+3.	Credit evaluation
+4.	Approval or rejection decision
+5.	System setup
+6.	Confirmation to stakeholders
+Delays frequently occur due to incomplete information, unclear ownership, or delayed approvals.
+________________________________________
+6. Detailed Process Steps
+________________________________________
+6.1 New Customer Request Submission
+New customer onboarding requests are typically initiated by the Sales team. Requests are submitted through email or shared templates. There is no single standardized form currently used across all regions.
+Minimum information required includes:
+•	Legal company name
+•	Company registration number
+•	Billing address
+•	Operational address (if different)
+•	Estimated monthly volume
+•	Requested credit limit
+•	Requested payment terms (e.g., 30 days)
+Some requests arrive with missing or inconsistent information, which causes delays.
+________________________________________
+6.2 Initial Validation by Operations
+Upon receiving the request, Operations performs a basic validation to ensure that all required information is provided. This step is usually done manually by checking emails and attachments.
+Common issues found during this stage:
+•	Missing registration documents
+•	Incomplete billing address
+•	No estimated shipment volume provided
+•	Unclear payment terms
+When information is missing, Operations contacts Sales for clarification. This back-and-forth often happens over multiple emails.
+________________________________________
+6.3 Credit Evaluation by Finance
+Once the request is validated, it is forwarded to the Finance or Credit Control team for evaluation. The credit evaluation process may include:
+•	Internal credit history check (if existing customer in other countries)
+•	External credit bureau checks
+•	Assessment of requested credit limit versus shipment volume
+•	Review of financial documents
+Based on the evaluation, Finance decides whether the customer should be:
+•	Approved as a credit customer
+•	Approved with a lower credit limit
+•	Approved as cash-only
+•	Rejected
+This decision-making process is not always documented clearly.
+________________________________________
+6.4 Approval Scenarios
+6.4.1 Credit Approved as Requested
+If the credit request is approved:
+•	Finance confirms the approved credit limit and payment terms
+•	Details are shared with Operations
+•	System setup can begin
+6.4.2 Credit Approved with Conditions
+Sometimes credit is approved with conditions such as:
+•	Reduced credit limit
+•	Shorter payment terms
+•	Partial prepaid requirement
+These conditions are communicated via email but not always captured in a structured format.
+6.4.3 Credit Rejected
+If credit is rejected:
+•	Customer may be offered cash-only terms
+•	Sales is informed to manage customer expectations
+•	Request may be closed or reworked
+________________________________________
+6.5 System Setup
+After credit approval, the Operations and Finance teams proceed with system setup.
+Typical system activities include:
+•	Creating customer record in CRM
+•	Creating customer master data in SAP
+•	Assigning billing and operational roles
+•	Configuring tax and invoicing parameters
+System setup errors are common due to manual data entry.
+________________________________________
+6.6 Common System Setup Issues
+Frequently observed issues include:
+•	Duplicate customer records
+•	Incorrect billing currency
+•	Wrong tax code assigned
+•	Credit limit mismatch between email approval and SAP setup
+When issues occur, tickets are raised to IT or Finance, causing delays.
+________________________________________
+6.7 Confirmation to Stakeholders
+Once setup is completed:
+•	Operations confirms readiness for shipment processing
+•	Sales is informed that the customer is live
+•	Finance monitors the first few invoices closely
+There is no standardized checklist to confirm all steps are completed before go-live.
+________________________________________
+7. Exception Handling and Escalations
+7.1 Delayed Credit Approval
+If credit approval takes more than 5 working days:
+•	Operations escalates to Finance Manager
+•	Sales may request temporary cash terms to start operations
+________________________________________
+7.2 Urgent Customer Go-Live Requests
+In some cases, urgent onboarding is required. Temporary workarounds include:
+•	Cash-only setup
+•	Manual billing
+•	Later credit conversion
+These practices increase operational risk.
+________________________________________
+8. Risks and Known Gaps
+The following issues have been identified:
+•	Heavy manual processing
+•	Lack of standardized forms
+•	No centralized tracking
+•	Dependency on email communication
+•	Limited audit trail
+New joiners often struggle to understand the process due to lack of clear documentation.
+________________________________________
+9. Compliance and Audit Considerations
+Improper customer setup can lead to:
+•	Revenue leakage
+•	Bad debt exposure
+•	Compliance violations
+•	Audit findings
+Finance periodically reviews customer credit exposure, but corrections are reactive rather than preventive.
+________________________________________
+10. Training and Knowledge Sharing
+Currently, training is conducted informally through:
+•	Shadowing experienced staff
+•	Email instructions
+•	Chat-based guidance
+This SOP is intended to evolve into a proper training reference.
+________________________________________
+11. Summary
+This SOP documents the current-state process for customer credit approval and onboarding. While it captures real operational practices, it lacks standardization, structure, and automation. The content should be transformed into a cleaner SOP, simplified checklist, and searchable Knowledge Base articles.

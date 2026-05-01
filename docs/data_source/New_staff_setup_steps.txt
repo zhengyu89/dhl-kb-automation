@@ -1,0 +1,6 @@
+New staff setup steps:
+✔ Create AD account
+✔ Give email access
+✔ SAP + CW1 role
+✔ Share SOP folder
+Delay usually because SAP request not approved

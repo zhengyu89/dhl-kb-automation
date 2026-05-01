@@ -1,0 +1,6 @@
+Error Code: AUTH_401
+User not authorized to access module.
+Resolution:
+- Check AD group access
+- User must be in OPS_FWD_ROLE
+- Logout and login again

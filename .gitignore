@@ -1,0 +1,143 @@
+# ==============================================================================
+# Project: DHL KB Automation
+# Keep source, docs, lockfiles, and examples tracked.
+# Ignore local secrets, dependencies, generated files, caches, and runtime data.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Environment and secrets
+# ------------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# ------------------------------------------------------------------------------
+# Python / FastAPI backend
+# ------------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+
+.venv/
+venv/
+env/
+ENV/
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.tox/
+.nox/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+*.egg-info/
+.eggs/
+build/
+site/
+
+# uv caches should be local only. Keep uv.lock tracked.
+.uv-cache/
+uv-cache/
+
+# Local backend runtime data
+backend/storage/
+backend/uploads/
+backend/logs/
+backend/.easyocr-models/
+backend/*.db
+backend/*.sqlite
+backend/*.sqlite3
+
+# ------------------------------------------------------------------------------
+# Node / React frontend
+# ------------------------------------------------------------------------------
+node_modules/
+frontend/node_modules/
+
+dist/
+dist-ssr/
+frontend/dist/
+frontend/dist-ssr/
+
+.vite/
+frontend/.vite/
+.turbo/
+.next/
+out/
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Keep package-lock.json tracked.
+
+# ------------------------------------------------------------------------------
+# Logs and runtime output
+# ------------------------------------------------------------------------------
+logs/
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# ------------------------------------------------------------------------------
+# Generated reports and test artifacts
+# ------------------------------------------------------------------------------
+coverage/
+test-results/
+playwright-report/
+blob-report/
+junit.xml
+
+# ------------------------------------------------------------------------------
+# Local databases and data dumps
+# ------------------------------------------------------------------------------
+*.db
+*.sqlite
+*.sqlite3
+*.dump
+*.bak
+
+# ------------------------------------------------------------------------------
+# OCR / AI model cache files
+# ------------------------------------------------------------------------------
+.easyocr-models/
+models/
+*.onnx
+*.pt
+*.pth
+
+# ------------------------------------------------------------------------------
+# OS files
+# ------------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ------------------------------------------------------------------------------
+# Editor / IDE files
+# ------------------------------------------------------------------------------
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ------------------------------------------------------------------------------
+# Misc temporary files
+# ------------------------------------------------------------------------------
+tmp/
+temp/
+*.tmp
+*.temp
+*.local

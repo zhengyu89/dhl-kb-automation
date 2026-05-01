@@ -1,0 +1,27 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "extract-msg>=0.55.0",
+    "fastapi>=0.124.0",
+    "openai",
+    "openai-agents",
+    "pypdf>=6.1.3",
+    "pydantic-settings>=2.14.0",
+    "python-docx>=1.2.0",
+    "python-dotenv>=1.2.2",
+    "python-multipart>=0.0.27",
+    "sqlalchemy>=2.0.49",
+    "uvicorn>=0.38.0",
+    "psycopg[binary]>=3.3.3",
+    "psycopg2-binary>=2.9.12",
+    "easyocr",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]
