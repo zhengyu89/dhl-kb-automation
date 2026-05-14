@@ -28,20 +28,31 @@
       <x:String>System.ComponentModel</x:String>
       <x:String>System.Xml.Serialization</x:String>
       <x:String>System.Linq.Expressions</x:String>
+      <x:String>System.Numerics</x:String>
       <x:String>GlobalVariablesNamespace</x:String>
       <x:String>GlobalConstantsNamespace</x:String>
-      <x:String>System.Numerics</x:String>
     </sco:Collection>
   </TextExpression.NamespacesForImplementation>
   <TextExpression.ReferencesForImplementation>
     <sco:Collection x:TypeArguments="AssemblyReference">
       <AssemblyReference>Microsoft.VisualBasic</AssemblyReference>
+      <AssemblyReference>Microsoft.VisualBasic.Core</AssemblyReference>
+      <AssemblyReference>Microsoft.VisualBasic.Forms</AssemblyReference>
       <AssemblyReference>mscorlib</AssemblyReference>
+      <AssemblyReference>NPOI.Core</AssemblyReference>
       <AssemblyReference>PresentationCore</AssemblyReference>
       <AssemblyReference>PresentationFramework</AssemblyReference>
       <AssemblyReference>System</AssemblyReference>
       <AssemblyReference>System.Activities</AssemblyReference>
+      <AssemblyReference>System.CodeDom</AssemblyReference>
+      <AssemblyReference>System.Collections</AssemblyReference>
+      <AssemblyReference>System.Collections.NonGeneric</AssemblyReference>
+      <AssemblyReference>System.ComponentModel</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.EventBasedAsync</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.Primitives</AssemblyReference>
       <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
+      <AssemblyReference>System.Configuration.ConfigurationManager</AssemblyReference>
+      <AssemblyReference>System.Console</AssemblyReference>
       <AssemblyReference>System.Core</AssemblyReference>
       <AssemblyReference>System.Data</AssemblyReference>
       <AssemblyReference>System.Data.Common</AssemblyReference>
@@ -50,44 +61,34 @@
       <AssemblyReference>System.Drawing.Common</AssemblyReference>
       <AssemblyReference>System.Drawing.Primitives</AssemblyReference>
       <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>System.Linq.Async</AssemblyReference>
+      <AssemblyReference>System.Linq.Expressions</AssemblyReference>
+      <AssemblyReference>System.Memory</AssemblyReference>
+      <AssemblyReference>System.Memory.Data</AssemblyReference>
       <AssemblyReference>System.Net.Mail</AssemblyReference>
       <AssemblyReference>System.ObjectModel</AssemblyReference>
       <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Private.DataContractSerialization</AssemblyReference>
+      <AssemblyReference>System.Private.ServiceModel</AssemblyReference>
+      <AssemblyReference>System.Private.Uri</AssemblyReference>
+      <AssemblyReference>System.Private.Xml</AssemblyReference>
+      <AssemblyReference>System.Reflection.DispatchProxy</AssemblyReference>
+      <AssemblyReference>System.Reflection.Metadata</AssemblyReference>
+      <AssemblyReference>System.Reflection.MetadataLoadContext</AssemblyReference>
+      <AssemblyReference>System.Reflection.TypeExtensions</AssemblyReference>
+      <AssemblyReference>System.Runtime.Numerics</AssemblyReference>
+      <AssemblyReference>System.Runtime.Serialization.Formatters</AssemblyReference>
+      <AssemblyReference>System.Runtime.Serialization.Primitives</AssemblyReference>
+      <AssemblyReference>System.Security.Permissions</AssemblyReference>
       <AssemblyReference>System.Xaml</AssemblyReference>
       <AssemblyReference>System.Xml</AssemblyReference>
       <AssemblyReference>System.Xml.Linq</AssemblyReference>
+      <AssemblyReference>UiPath.Excel.Activities.Design</AssemblyReference>
+      <AssemblyReference>UiPath.Studio.Constants</AssemblyReference>
       <AssemblyReference>UiPath.System.Activities</AssemblyReference>
       <AssemblyReference>UiPath.UiAutomation.Activities</AssemblyReference>
+      <AssemblyReference>UiPath.Workflow</AssemblyReference>
       <AssemblyReference>WindowsBase</AssemblyReference>
-      <AssemblyReference>UiPath.Studio.Constants</AssemblyReference>
-      <AssemblyReference>System.Reflection.DispatchProxy</AssemblyReference>
-      <AssemblyReference>System.Reflection.TypeExtensions</AssemblyReference>
-      <AssemblyReference>System.Reflection.Metadata</AssemblyReference>
-      <AssemblyReference>System.Reflection.MetadataLoadContext</AssemblyReference>
-      <AssemblyReference>System.Private.ServiceModel</AssemblyReference>
-      <AssemblyReference>System.Private.DataContractSerialization</AssemblyReference>
-      <AssemblyReference>System.Runtime.Serialization.Formatters</AssemblyReference>
-      <AssemblyReference>System.Runtime.Serialization.Primitives</AssemblyReference>
-      <AssemblyReference>System.ComponentModel</AssemblyReference>
-      <AssemblyReference>System.ComponentModel.EventBasedAsync</AssemblyReference>
-      <AssemblyReference>System.ComponentModel.Primitives</AssemblyReference>
-      <AssemblyReference>System.Private.Xml</AssemblyReference>
-      <AssemblyReference>System.Memory.Data</AssemblyReference>
-      <AssemblyReference>UiPath.Excel.Activities.Design</AssemblyReference>
-      <AssemblyReference>System.Console</AssemblyReference>
-      <AssemblyReference>System.Security.Permissions</AssemblyReference>
-      <AssemblyReference>System.Configuration.ConfigurationManager</AssemblyReference>
-      <AssemblyReference>System.Memory</AssemblyReference>
-      <AssemblyReference>System.Private.Uri</AssemblyReference>
-      <AssemblyReference>System.Linq.Async</AssemblyReference>
-      <AssemblyReference>NPOI.Core</AssemblyReference>
-      <AssemblyReference>System.Collections</AssemblyReference>
-      <AssemblyReference>System.Collections.NonGeneric</AssemblyReference>
-      <AssemblyReference>System.Linq.Expressions</AssemblyReference>
-      <AssemblyReference>System.CodeDom</AssemblyReference>
-      <AssemblyReference>Microsoft.VisualBasic.Forms</AssemblyReference>
-      <AssemblyReference>Microsoft.VisualBasic.Core</AssemblyReference>
-      <AssemblyReference>System.Runtime.Numerics</AssemblyReference>
     </sco:Collection>
   </TextExpression.ReferencesForImplementation>
   <sap:WorkflowViewStateService.ViewState>
@@ -95,7 +96,7 @@
       <x:Boolean x:Key="ShouldExpandAll">True</x:Boolean>
     </scg:Dictionary>
   </sap:WorkflowViewStateService.ViewState>
-  <Sequence DisplayName="Main Sequence" sap:VirtualizedContainerService.HintSize="522.8000000000001,1671.2" sap2010:WorkflowViewState.IdRef="Sequence_1">
+  <Sequence DisplayName="Main Sequence" sap:VirtualizedContainerService.HintSize="766.8000000000001,1671.2" sap2010:WorkflowViewState.IdRef="Sequence_1">
     <Sequence.Variables>
       <Variable x:TypeArguments="x:String" Name="variable1" />
       <Variable x:TypeArguments="scg:List(x:String)" Name="AllowedExtensions" />
@@ -112,6 +113,16 @@
       <Variable x:TypeArguments="x:String" Name="CurrentExtension" />
       <Variable x:TypeArguments="x:String" Name="CurrentFileName" />
       <Variable x:TypeArguments="x:String" Name="CurrentFilePath" />
+      <Variable x:TypeArguments="scg:Dictionary(x:String, x:String)" Default="[New Dictionary(Of String, String)]" Name="Config" />
+      <Variable x:TypeArguments="s:String[]" Name="AllFiles" />
+      <Variable x:TypeArguments="scg:List(x:String)" Default="[New List(Of String)]" Name="EligibleFiles" />
+      <Variable x:TypeArguments="x:Int32" Default="0" Name="TotalDetected" />
+      <Variable x:TypeArguments="x:String" Default="[Guid.NewGuid.ToString]" Name="RunId" />
+      <Variable x:TypeArguments="scg:List(x:String)" Default="[new List(Of String)()]" Name="SummaryRows" />
+      <Variable x:TypeArguments="x:Int32" Default="0" Name="FailedCount" />
+      <Variable x:TypeArguments="x:Int32" Default="0" Name="NeedReviewCount" />
+      <Variable x:TypeArguments="x:Int32" Default="0" Name="DuplicateCount" />
+      <Variable x:TypeArguments="x:Int32" Default="0" Name="CreatedCount" />
     </Sequence.Variables>
     <sap:WorkflowViewStateService.ViewState>
       <scg:Dictionary x:TypeArguments="x:String, x:Object">
@@ -120,13 +131,13 @@
     </sap:WorkflowViewStateService.ViewState>
     <ui:InvokeWorkflowFile ArgumentsVariable="{x:Null}" DisplayName="Init_Config - Invoke Workflow File (Init_Config.xaml)" sap:VirtualizedContainerService.HintSize="451.2,176" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_1" UnSafe="False" WorkflowFileName="Init_Config.xaml">
       <ui:InvokeWorkflowFile.Arguments>
-        <InOutArgument x:TypeArguments="scg:Dictionary(x:String, x:String)" x:Key="Config">[GlobalVariablesNamespace.GlobalVariables.Config]</InOutArgument>
+        <InOutArgument x:TypeArguments="scg:Dictionary(x:String, x:String)" x:Key="Config">[Config]</InOutArgument>
       </ui:InvokeWorkflowFile.Arguments>
     </ui:InvokeWorkflowFile>
     <ui:InvokeWorkflowFile ArgumentsVariable="{x:Null}" DisplayName="Scan_Source_Folder - Invoke Workflow File (Scan_Source_Folder.xaml)" sap:VirtualizedContainerService.HintSize="451.2,176" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_2" UnSafe="False" WorkflowFileName="Scan_Source_Folder.xaml">
       <ui:InvokeWorkflowFile.Arguments>
         <OutArgument x:TypeArguments="s:String[]" x:Key="AllFiles">[AllFiles]</OutArgument>
-        <InArgument x:TypeArguments="scg:Dictionary(x:String, x:String)" x:Key="Config">[GlobalVariablesNamespace.GlobalVariables.Config]</InArgument>
+        <InArgument x:TypeArguments="scg:Dictionary(x:String, x:String)" x:Key="Config">[Config]</InArgument>
         <OutArgument x:TypeArguments="x:Int32" x:Key="TotalDetected">[TotalDetected]</OutArgument>
       </ui:InvokeWorkflowFile.Arguments>
     </ui:InvokeWorkflowFile>
@@ -137,7 +148,7 @@
         <InArgument x:TypeArguments="scg:Dictionary(x:String, x:String)" x:Key="Config">[Config]</InArgument>
       </ui:InvokeWorkflowFile.Arguments>
     </ui:InvokeWorkflowFile>
-    <ui:MessageBox Caption="{x:Null}" ChosenButton="{x:Null}" AutoCloseAfter="00:00:00" DisplayName="Message Box" sap:VirtualizedContainerService.HintSize="451.2,122.4" sap2010:WorkflowViewState.IdRef="MessageBox_1" Text="[&quot;Total detected: &quot; + TotalDetected.ToString + vbCrLf +&#xD;&#xA;&quot;Eligible files: &quot; + EligibleFiles.Count.ToString]" />
+    <ui:MessageBox Caption="{x:Null}" ChosenButton="{x:Null}" AutoCloseAfter="00:00:00" DisplayName="Message Box" sap:VirtualizedContainerService.HintSize="451.2,122.4" sap2010:WorkflowViewState.IdRef="MessageBox_1" Text="[&quot;Total detected: &quot; + TotalDetected.ToString + vbCrLf +&#xA;&quot;Eligible files: &quot; + EligibleFiles.Count.ToString]" />
     <ui:ForEach x:TypeArguments="x:String" CurrentIndex="{x:Null}" DisplayName="For Each filePath" sap:VirtualizedContainerService.HintSize="451.2,884" sap2010:WorkflowViewState.IdRef="ForEach`1_1" Values="[EligibleFiles]">
       <ui:ForEach.Body>
         <ActivityAction x:TypeArguments="x:String">
@@ -181,10 +192,10 @@
             <ui:InvokeWorkflowFile ArgumentsVariable="{x:Null}" DisplayName="Route_File - Invoke Workflow File (Route_File.xaml)" sap:VirtualizedContainerService.HintSize="416,167.2" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_8" UnSafe="False" WorkflowFileName="Route_File.xaml">
               <ui:InvokeWorkflowFile.Arguments>
                 <InOutArgument x:TypeArguments="scg:List(x:String)" x:Key="SummaryRows">[SummaryRows]</InOutArgument>
-                <InOutArgument x:TypeArguments="x:String" x:Key="FailedCount" />
-                <InOutArgument x:TypeArguments="x:String" x:Key="NeedReviewCount" />
-                <InOutArgument x:TypeArguments="x:String" x:Key="DuplicatedCount" />
-                <InOutArgument x:TypeArguments="x:String" x:Key="CreatedCount" />
+                <InOutArgument x:TypeArguments="x:Int32" x:Key="FailedCount">[FailedCount]</InOutArgument>
+                <InOutArgument x:TypeArguments="x:Int32" x:Key="NeedReviewCount">[NeedReviewCount]</InOutArgument>
+                <InOutArgument x:TypeArguments="x:Int32" x:Key="DuplicatedCount">[DuplicateCount]</InOutArgument>
+                <InOutArgument x:TypeArguments="x:Int32" x:Key="CreatedCount">[CreatedCount]</InOutArgument>
                 <InArgument x:TypeArguments="x:String" x:Key="BackendMessage">[BackendMessage]</InArgument>
                 <InArgument x:TypeArguments="x:String" x:Key="ApiResponseStatus">[ApiResponseStatus]</InArgument>
                 <InArgument x:TypeArguments="scg:Dictionary(x:String, x:String)" x:Key="Config">[Config]</InArgument>
@@ -195,6 +206,6 @@
         </ActivityAction>
       </ui:ForEach.Body>
     </ui:ForEach>
-    <ui:MessageBox Caption="{x:Null}" ChosenButton="{x:Null}" AutoCloseAfter="00:00:00" DisplayName="Message Box" sap:VirtualizedContainerService.HintSize="451.2,113.6" sap2010:WorkflowViewState.IdRef="MessageBox_3" Text="[&quot;Run completed&quot; + vbCrLf +&#xD;&#xA;&quot;Total detected: &quot; + TotalDetected.ToString + vbCrLf +&#xD;&#xA;&quot;Eligible: &quot; + EligibleFiles.Count.ToString + vbCrLf +&#xD;&#xA;&quot;Created: &quot; + CreatedCount.ToString + vbCrLf +&#xD;&#xA;&quot;Duplicate: &quot; + DuplicateCount.ToString + vbCrLf +&#xD;&#xA;&quot;Need review: &quot; + NeedReviewCount.ToString + vbCrLf +&#xD;&#xA;&quot;Failed: &quot; + FailedCount.ToString]" />
+    <ui:MessageBox Caption="{x:Null}" ChosenButton="{x:Null}" AutoCloseAfter="00:00:00" DisplayName="Message Box" sap:VirtualizedContainerService.HintSize="334.4,90.4" sap2010:WorkflowViewState.IdRef="MessageBox_3" Text="[&quot;Run completed&quot; + vbCrLf +&#xA;&quot;Total detected: &quot; + TotalDetected.ToString + vbCrLf +&#xA;&quot;Eligible: &quot; + EligibleFiles.Count.ToString + vbCrLf +&#xA;&quot;Created: &quot; + CreatedCount.ToString + vbCrLf +&#xA;&quot;Duplicate: &quot; + DuplicateCount.ToString + vbCrLf +&#xA;&quot;Need review: &quot; + NeedReviewCount.ToString + vbCrLf +&#xA;&quot;Failed: &quot; + FailedCount.ToString + vbCrLf +&#xA;String.Join(vbCrLf, SummaryRows)]" />
   </Sequence>
 </Activity>

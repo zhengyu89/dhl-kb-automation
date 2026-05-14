@@ -34,8 +34,6 @@
       <x:String>UiPath.Core</x:String>
       <x:String>UiPath.Core.Activities</x:String>
       <x:String>System.Windows.Markup</x:String>
-      <x:String>GlobalVariablesNamespace</x:String>
-      <x:String>GlobalConstantsNamespace</x:String>
       <x:String>System.Reflection</x:String>
       <x:String>System.Runtime.Serialization</x:String>
       <x:String>System.Linq.Expressions</x:String>
@@ -118,7 +116,7 @@
       <AssemblyReference>UiPath.Workflow</AssemblyReference>
     </sco:Collection>
   </TextExpression.ReferencesForImplementation>
-  <Sequence DisplayName="Send_To_FastAPI" sap:VirtualizedContainerService.HintSize="493.2000000000001,1371.2" sap2010:WorkflowViewState.IdRef="Sequence_1">
+  <Sequence DisplayName="Send_To_FastAPI" sap:VirtualizedContainerService.HintSize="1037.2,1371.2" sap2010:WorkflowViewState.IdRef="Sequence_1">
     <Sequence.Variables>
       <Variable x:TypeArguments="x:String" Name="variable2" />
       <Variable x:TypeArguments="uwahm:HttpResponseSummary" Name="ApiResponse" />

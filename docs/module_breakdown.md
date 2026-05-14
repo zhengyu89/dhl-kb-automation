@@ -99,7 +99,7 @@ The critical path for the demo is Module 2 through Module 5: upload a messy sour
 | Submit review | `POST /api/articles/{article_id}/submit-review` | Module 6 | Frontend editor | Status transition to `submitted` |
 | Approve article | `POST /api/articles/{article_id}/approve` | Module 6 | Frontend reviewer | Status transition to `reviewed` |
 | Publish article | `POST /api/articles/{article_id}/publish` | Module 6 | Frontend reviewer | Status transition to `published` |
-| RPA ingest | `POST /api/rpa/ingest` | Module 8 | UiPath | Created, duplicate, or failed item result |
+| RPA ingest | `POST /api/rpa/ingest` | Module 8 | UiPath | Created, duplicate, needs editor review, or failed item result |
 | Admin logs | `GET /api/logs` | Module 9 | Admin dashboard | Processing, OCR, AI, RPA, and system events |
 
 ## 6. Shared Data Contracts
@@ -524,9 +524,9 @@ Use UiPath to detect new files and send them to FastAPI for processing.
 UiPath should only:
 
 1. Detect new files.
-2. Send file/text to FastAPI.
-3. Receive result from API.
-4. Log created, duplicate, or failed.
+2. Send file to FastAPI.
+3. Receive the final result from API.
+4. Log created, duplicate, needs-editor-review, or failed outcomes.
 5. Take screenshot if error.
 6. Send summary email.
 
@@ -546,7 +546,7 @@ FastAPI should:
 ### RPA Status Rule
 
 - Successful RPA-created article should use `rpa_submitted`.
-- If OCR is poor or incomplete, keep status as `draft` and set `requires_editor_review = true`.
+- If OCR, AI review flags, or long-document preservation require human validation, keep status as `draft` and set `requires_editor_review = true`.
 
 ### Database Tables
 

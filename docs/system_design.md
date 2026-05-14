@@ -310,10 +310,10 @@ stateDiagram-v2
 | `GET` | `/api/articles/{article_id}` | View article details | Implemented |
 | `PATCH` | `/api/articles/{article_id}` | Edit structured draft content | Implemented |
 | `GET` | `/api/articles/{article_id}/versions` | View article version history | Implemented |
-| `POST` | `/api/rpa/ingest` | UiPath ingestion endpoint | Planned |
-| `POST` | `/api/articles/{article_id}/submit-review` | Submit draft for review | Planned |
-| `POST` | `/api/articles/{article_id}/approve` | Reviewer approval | Planned |
-| `POST` | `/api/articles/{article_id}/publish` | Publish reviewed article | Planned |
+| `POST` | `/api/rpa/ingest` | UiPath ingestion endpoint | Implemented |
+| `POST` | `/api/articles/{article_id}/submit-review` | Submit draft for review | Implemented |
+| `POST` | `/api/articles/{article_id}/approve` | Reviewer approval | Implemented |
+| `POST` | `/api/articles/{article_id}/publish` | Publish reviewed article | Implemented |
 | `GET` | `/api/logs` | Admin log viewer | Planned |
 
 ### 10.2 `POST /api/uploads`
@@ -370,7 +370,45 @@ Response shape:
 }
 ```
 
-### 10.4 `PATCH /api/articles/{article_id}`
+### 10.4 `POST /api/rpa/ingest`
+
+Request:
+
+```http
+POST /api/rpa/ingest
+Content-Type: multipart/form-data
+```
+
+Behavior:
+
+- The endpoint reuses the existing backend extraction, duplicate-detection, OCR, AI, and article-creation pipeline.
+- Unlike `/api/uploads`, it waits for processing to reach a terminal state and returns the final result directly.
+- For MVP and local development, the endpoint is unauthenticated.
+- Preferred request mode is multipart file upload.
+- For compatibility with the current local UiPath implementation, the backend also accepts a readable local file path in `file` when the bot and API run on the same machine.
+
+Response shape:
+
+```json
+{
+  "status": "created",
+  "processing_id": "source-document-uuid",
+  "article_id": "article-uuid",
+  "source_document_id": "source-document-uuid",
+  "duplicate_of_source_id": null,
+  "message": "Draft article created",
+  "requires_editor_review": false
+}
+```
+
+Status rules:
+
+- `created`: article was created and stored as `rpa_submitted`
+- `needs_editor_review`: article was created and stored as `draft` with `requires_editor_review = true`
+- `duplicate`: duplicate source detected within the duplicate lookback window
+- `failed`: backend could not complete the ingestion flow and returns a contract-shaped failure response when possible
+
+### 10.5 `PATCH /api/articles/{article_id}`
 
 Request body is `ArticleUpdatePayload`, which extends `KBArticleDraft` with `change_note`.
 
@@ -457,7 +495,7 @@ erDiagram
 | --- | --- |
 | `draft` | Editable article draft |
 | `submitted` | Waiting for reviewer action |
-| `rpa_submitted` | Submitted by UiPath and waiting for reviewer action |
+| `rpa_submitted` | Submitted by UiPath and waiting for reviewer action when no review flag is required |
 | `reviewed` | Approved but not necessarily published |
 | `published` | Visible in the Knowledge Base |
 | `rejected` | Rejected by reviewer |
@@ -484,7 +522,7 @@ erDiagram
 | `created` | Draft article created |
 | `duplicate` | Duplicate detected |
 | `failed` | Processing failed |
-| `needs_editor_review` | OCR or AI output needs human review |
+| `needs_editor_review` | OCR, AI, or long-document preservation output needs human review |
 
 ### 11.3 `app_users`
 

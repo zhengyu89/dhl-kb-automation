@@ -2,7 +2,6 @@
 
 import os
 import shutil
-import time
 import unittest
 from pathlib import Path
 
@@ -12,66 +11,27 @@ from sqlalchemy import select
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 load_dotenv(BASE_DIR / ".env")
-OCR_CACHE_DIR = BASE_DIR / ".easyocr-models"
 
-from app.core.auth import seed_demo_users
 from app.db.models import AIGenerationRun, ArticleKeyword, ArticleVersion, KBArticle
-from app.db.session import Base, SessionLocal, engine
+from app.db.session import SessionLocal
 from app.main import app
-from app.services import source_processing as processing
-
-
-def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[2]
-
-
-def _login_headers(
-    client: TestClient, login_id: str = "Editor1", password: str = "editor123"
-) -> dict[str, str]:
-    response = client.post(
-        "/api/auth/login",
-        json={"login_id": login_id, "password": password},
-    )
-    assert response.status_code == 200
-    token = response.json()["access_token"]
-    return {"Authorization": f"Bearer {token}"}
-
-
-def _poll_processing(client: TestClient, processing_id: str, headers: dict[str, str]) -> dict:
-    terminal_statuses = {"created", "duplicate", "failed", "needs_editor_review"}
-    last_payload = {}
-    for _ in range(60):
-        response = client.get(f"/api/processing/{processing_id}", headers=headers)
-        assert response.status_code == 200
-        last_payload = response.json()
-        if last_payload["processing_status"] in terminal_statuses:
-            return last_payload
-        time.sleep(0.5)
-    return last_payload
+from tests.support import configure_test_storage, login_headers, poll_processing, repo_root, reset_database_state
 
 
 class ArticleGenerationManagementTests(unittest.TestCase):
     """Validates article records created from uploads and subsequent article edits."""
 
     def setUp(self) -> None:
-        self.test_storage_root = _repo_root() / "backend" / ".test_uploads"
-        shutil.rmtree(self.test_storage_root, ignore_errors=True)
-        processing.settings.upload_storage_dir = str(self.test_storage_root)
-        processing.settings.easyocr_model_storage_dir = str(OCR_CACHE_DIR)
-        processing.settings.openai_api_key = None
-        Base.metadata.drop_all(bind=engine)
-        Base.metadata.create_all(bind=engine)
-        with SessionLocal() as db:
-            seed_demo_users(db)
+        self.test_storage_root = configure_test_storage()
+        reset_database_state()
         self.client = TestClient(app)
-        self.headers = _login_headers(self.client)
+        self.headers = login_headers(self.client)
 
     def tearDown(self) -> None:
-        Base.metadata.drop_all(bind=engine)
         shutil.rmtree(self.test_storage_root, ignore_errors=True)
 
     def _upload_text_source(self, filename: str = "Error_Code_AUTH_401.txt") -> dict:
-        sample_path = _repo_root() / "docs" / "data_source" / filename
+        sample_path = repo_root() / "docs" / "data_source" / filename
         with sample_path.open("rb") as handle:
             response = self.client.post(
                 "/api/uploads",
@@ -79,7 +39,7 @@ class ArticleGenerationManagementTests(unittest.TestCase):
                 files={"file": (sample_path.name, handle, "text/plain")},
             )
         self.assertEqual(response.status_code, 202)
-        return _poll_processing(self.client, response.json()["processing_id"], self.headers)
+        return poll_processing(self.client, response.json()["processing_id"], self.headers)
 
     def test_processing_creates_ai_run_article_and_initial_version(self) -> None:
         payload = self._upload_text_source()

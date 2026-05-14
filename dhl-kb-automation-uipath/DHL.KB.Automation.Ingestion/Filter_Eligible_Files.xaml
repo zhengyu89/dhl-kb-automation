@@ -32,8 +32,6 @@
       <x:String>UiPath.Core</x:String>
       <x:String>UiPath.Core.Activities</x:String>
       <x:String>System.Windows.Markup</x:String>
-      <x:String>GlobalVariablesNamespace</x:String>
-      <x:String>GlobalConstantsNamespace</x:String>
       <x:String>System.Reflection</x:String>
       <x:String>System.Runtime.Serialization</x:String>
       <x:String>System.Linq.Expressions</x:String>
@@ -250,7 +248,7 @@
       <AssemblyReference>System.Net.Sockets</AssemblyReference>
     </sco:Collection>
   </TextExpression.ReferencesForImplementation>
-  <Sequence DisplayName="Filter_Eligible_Files" sap:VirtualizedContainerService.HintSize="493.20000000000005,1172.8" sap2010:WorkflowViewState.IdRef="Sequence_1">
+  <Sequence DisplayName="Filter_Eligible_Files" sap:VirtualizedContainerService.HintSize="1037.2,1172.8" sap2010:WorkflowViewState.IdRef="Sequence_1">
     <Sequence.Variables>
       <Variable x:TypeArguments="x:String" Name="fileExtension" />
       <Variable x:TypeArguments="scg:List(x:String)" Name="AllowedExtensions" />

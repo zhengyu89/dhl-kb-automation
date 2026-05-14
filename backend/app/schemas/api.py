@@ -125,6 +125,16 @@ class UploadResponse(BaseModel):
     processing_stage: str
 
 
+class RPAIngestResponse(BaseModel):
+    status: Literal["created", "duplicate", "needs_editor_review", "failed"]
+    processing_id: str | None
+    article_id: str | None
+    source_document_id: str | None
+    duplicate_of_source_id: str | None
+    message: str
+    requires_editor_review: bool
+
+
 class ArticleListItem(BaseModel):
     id: str
     title: str

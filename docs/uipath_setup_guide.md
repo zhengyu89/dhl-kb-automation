@@ -167,10 +167,11 @@ UiPath should submit files to:
 
 - `POST /api/rpa/ingest`
 
-Important design note:
+Current implementation note:
 
-- In `system_design.md`, this endpoint is currently marked as `Planned`.
-- UiPath setup should therefore target this contract, but the backend must implement it before end-to-end RPA testing can be completed.
+- `/api/rpa/ingest` is implemented in the backend.
+- For MVP, this endpoint is synchronous and returns the final terminal result directly in one response.
+- This differs from `/api/uploads`, which returns a queued `processing_id` and is polled separately.
 
 ### 6.2 Request Shape
 
@@ -185,12 +186,16 @@ Suggested request parts:
 - `rpa_run_id`
 - `detected_at`
 
-If the source is already available as text rather than a file export, include:
+Preferred mode:
 
-- `raw_text`
-- `source_reference`
+- send the source as a real multipart file upload
 
-The backend should still remain responsible for storing the source and deciding the final `source_type`.
+Compatibility mode for the current local UiPath workflow:
+
+- UiPath may send the local file path in `file` and `source_path` as query parameters instead of a multipart file body
+- the backend accepts this when UiPath and FastAPI are running on the same machine and the path is readable by the backend process
+
+Raw-text-only RPA ingestion is not implemented on `/api/rpa/ingest`.
 
 ### 6.3 Response Handling
 
@@ -211,13 +216,27 @@ UiPath should log these response fields when available:
 - `message`
 - `requires_editor_review`
 
+Example response:
+
+```json
+{
+  "status": "created",
+  "processing_id": "source-document-uuid",
+  "article_id": "article-uuid",
+  "source_document_id": "source-document-uuid",
+  "duplicate_of_source_id": null,
+  "message": "Draft article created",
+  "requires_editor_review": false
+}
+```
+
 ### 6.4 Meaning of Each Result
 
 #### `created`
 
 Meaning:
 
-- FastAPI successfully created a draft article record.
+- FastAPI successfully created an article from the RPA source and returned a terminal success result.
 
 UiPath action:
 
@@ -227,7 +246,7 @@ UiPath action:
 Backend note:
 
 - manual uploads normally create article status `draft`
-- successful RPA ingestion may create article status `rpa_submitted`, unless review flags force a safer path
+- successful RPA ingestion creates article status `rpa_submitted` when no review flag is required
 
 #### `duplicate`
 
@@ -244,7 +263,7 @@ UiPath action:
 
 Meaning:
 
-- the backend processed the item, but OCR ambiguity, AI ambiguity, or long-document preservation requires human review
+- the backend processed the item, but OCR-derived content, AI ambiguity, or long-document preservation requires human review
 
 UiPath action:
 
@@ -254,7 +273,7 @@ UiPath action:
 Design note:
 
 - this aligns with the `processing_status` enum in the latest design
-- OCR-derived content must be reviewed before publication
+- OCR-derived content is returned as `needs_editor_review` even when OCR confidence is otherwise high
 - long-document heuristic preservation also sets `requires_editor_review = true`
 
 #### `failed`
@@ -280,12 +299,13 @@ UiPath action:
 5. Limit items if `MaxItemsPerRun` is configured.
 6. Loop through files one by one.
 7. Build and send the API request.
-8. Parse the backend response.
-9. Route the file according to result.
-10. Add the item to the summary log.
-11. On UiPath-side exception, capture screenshot and continue when safe.
-12. Send summary email.
-13. End the run.
+8. Receive the final backend response from `/api/rpa/ingest`.
+9. Parse the backend response.
+10. Route the file according to result.
+11. Add the item to the summary log.
+12. On UiPath-side exception, capture screenshot and continue when safe.
+13. Send summary email.
+14. End the run.
 
 ### 7.2 Decision Rules
 
@@ -417,13 +437,9 @@ Before running UiPath locally, make sure:
 2. the project database is available.
 3. FastAPI starts successfully.
 4. the backend file storage path is writable.
-5. `POST /api/rpa/ingest` has been implemented or mocked.
+5. `POST /api/rpa/ingest` is implemented and reachable.
 6. test files exist in `input/`.
 7. UiPath config points to `http://localhost:8000`.
-
-Practical note:
-
-- if `/api/rpa/ingest` is still unimplemented, UiPath workflow development can still proceed using a stubbed response or Postman-tested mock contract
 
 ## 12. Alignment With Functional Requirements
 

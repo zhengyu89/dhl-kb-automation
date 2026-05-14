@@ -93,15 +93,18 @@ def create_source_document(
     content_type: str | None,
     file_bytes: bytes,
     uploaded_by: uuid.UUID | None,
+    ingestion_method: str = "manual_upload",
+    log_metadata: dict | None = None,
 ) -> SourceDocument:
     source_type = infer_source_type(filename, content_type)
     storage_path = save_upload_bytes(filename, file_bytes)
     file_hash = hashlib.sha256(file_bytes).hexdigest()
+    normalized_ingestion_method = (ingestion_method or "manual_upload").strip().lower() or "manual_upload"
 
     source_document = SourceDocument(
         original_filename=Path(filename).name,
         source_type=source_type,
-        ingestion_method="manual_upload",
+        ingestion_method=normalized_ingestion_method,
         storage_path=storage_path,
         mime_type=content_type,
         file_hash=file_hash,
@@ -126,10 +129,14 @@ def create_source_document(
         event_type="upload_created",
         entity_id=source_document.id,
         message=f"Upload queued for {source_document.original_filename}",
-        metadata={
-            "source_type": source_type.value,
-            "mime_type": content_type,
-        },
+        metadata=_merge_log_metadata(
+            {
+                "source_type": source_type.value,
+                "mime_type": content_type,
+                "ingestion_method": normalized_ingestion_method,
+            },
+            log_metadata,
+        ),
     )
     db.commit()
     db.refresh(source_document)
@@ -156,6 +163,14 @@ def append_system_log(
             metadata_json=metadata,
         )
     )
+
+
+def _merge_log_metadata(*metadata_parts: dict | None) -> dict | None:
+    merged: dict = {}
+    for item in metadata_parts:
+        if item:
+            merged.update(item)
+    return merged or None
 
 
 def _set_processing_state(
@@ -212,7 +227,7 @@ def _find_duplicate(db: Session, source_document: SourceDocument) -> SourceDocum
     )
 
 
-def process_source_document(source_document_id: uuid.UUID) -> None:
+def process_source_document(source_document_id: uuid.UUID, processing_metadata: dict | None = None) -> None:
     db = SessionLocal()
     try:
         source_document = db.get(SourceDocument, source_document_id)
@@ -248,7 +263,10 @@ def process_source_document(source_document_id: uuid.UUID) -> None:
                 entity_id=source_document.id,
                 message=f"Duplicate source detected for {source_document.original_filename}",
                 severity="warning",
-                metadata={"duplicate_of_source_id": str(duplicate.id)},
+                metadata=_merge_log_metadata(
+                    {"duplicate_of_source_id": str(duplicate.id)},
+                    processing_metadata,
+                ),
             )
             db.commit()
             return
@@ -277,6 +295,7 @@ def process_source_document(source_document_id: uuid.UUID) -> None:
         )
         db.add(ai_run)
 
+        requires_editor_review = source_document.requires_editor_review or ai_result.draft.requires_editor_review
         if ocr_result is not None:
             is_low_confidence = (
                 ocr_result.average_confidence is not None
@@ -291,12 +310,17 @@ def process_source_document(source_document_id: uuid.UUID) -> None:
                     is_low_confidence=is_low_confidence,
                 )
             )
-            source_document.requires_editor_review = True
-            final_status = (
-                ProcessingStatus.needs_editor_review if is_low_confidence else ProcessingStatus.created
-            )
-        else:
-            final_status = ProcessingStatus.created
+            requires_editor_review = requires_editor_review or is_low_confidence
+
+        source_document.requires_editor_review = requires_editor_review
+        final_status = (
+            ProcessingStatus.needs_editor_review if requires_editor_review else ProcessingStatus.created
+        )
+        article_status = (
+            ArticleStatus.rpa_submitted
+            if source_document.ingestion_method == "rpa" and not requires_editor_review
+            else ArticleStatus.draft
+        )
 
         article = create_article_from_draft(
             db,
@@ -305,7 +329,7 @@ def process_source_document(source_document_id: uuid.UUID) -> None:
             created_by=source_document.uploaded_by,
             created_via=source_document.ingestion_method,
             requires_editor_review=source_document.requires_editor_review,
-            status=ArticleStatus.draft,
+            status=article_status,
         )
         ai_run.article_id = article.id
         source_document.processed_at = datetime.now(UTC)
@@ -319,7 +343,10 @@ def process_source_document(source_document_id: uuid.UUID) -> None:
             event_type="processing_completed",
             entity_id=source_document.id,
             message=f"Processing completed for {source_document.original_filename}",
-            metadata={"processing_status": final_status.value},
+            metadata=_merge_log_metadata(
+                {"processing_status": final_status.value},
+                processing_metadata,
+            ),
         )
         db.commit()
     except Exception as exc:
@@ -358,7 +385,10 @@ def process_source_document(source_document_id: uuid.UUID) -> None:
                 entity_id=source_document.id,
                 message=f"Processing failed for {source_document.original_filename}",
                 severity="error",
-                metadata={"error": str(exc)},
+                metadata=_merge_log_metadata(
+                    {"error": str(exc)},
+                    processing_metadata,
+                ),
             )
             db.commit()
     finally:

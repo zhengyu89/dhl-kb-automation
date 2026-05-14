@@ -1133,7 +1133,8 @@ function ArticleWorkspace({
     if (!article || user.role !== 'admin') {
       return
     }
-    const confirmed = window.confirm(`Delete "${article.title}" from the Knowledge Base? This cannot be undone.`)
+    const locationLabel = mode === 'drafts' ? 'AI Draft Builder' : 'Knowledge Base'
+    const confirmed = window.confirm(`Delete "${article.title}" from ${locationLabel}? This cannot be undone.`)
     if (!confirmed) {
       return
     }
@@ -1144,8 +1145,15 @@ function ArticleWorkspace({
     try {
       await deleteArticle(article.id)
       setArticles((current) => current.filter((item) => item.id !== article.id))
-      closeArticlePage()
-      setMessage('Article deleted from the Knowledge Base.')
+      setSelectedId(null)
+      setArticle(null)
+      setVersions([])
+      setForm(null)
+      setIsReviewEditing(false)
+      if (isKnowledgeMode) {
+        window.history.replaceState(null, '', '#knowledge-base')
+      }
+      setMessage(`Article deleted from ${locationLabel}.`)
     } catch (caught: unknown) {
       setError(responseErrorDetail(caught, 'Unable to delete the article.'))
     } finally {
@@ -1573,6 +1581,12 @@ function ArticleWorkspace({
                     {mode === 'review' ? (
                       <Button type="button" variant="outline" onClick={() => setIsReviewEditing(false)}>
                         Cancel Edit
+                      </Button>
+                    ) : null}
+                    {mode === 'drafts' && user.role === 'admin' ? (
+                      <Button type="button" variant="destructive" disabled={isDeleting} onClick={handleDeleteArticle}>
+                        <XCircle data-icon="inline-start" />
+                        {isDeleting ? 'Deleting...' : 'Delete Draft'}
                       </Button>
                     ) : null}
                     <Badge variant="outline">New version only when content changes</Badge>

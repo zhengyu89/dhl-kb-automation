@@ -1,11 +1,14 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 import uuid
 
-from fastapi import BackgroundTasks, Depends, FastAPI, File, HTTPException, Query, UploadFile, status
+from fastapi import BackgroundTasks, Depends, FastAPI, File, HTTPException, Query, Request, UploadFile, status
+from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+from starlette.datastructures import UploadFile as StarletteUploadFile
 
 from app.core.auth import (
     LoginRequest,
@@ -30,6 +33,7 @@ from app.schemas.api import (
     DraftPreview,
     OCRResultSummary,
     ProcessingStatusResponse,
+    RPAIngestResponse,
     SourceDocumentSummary,
     UploadResponse,
     UserProfile,
@@ -45,6 +49,7 @@ from app.services.article_management import (
     transition_article_status,
     update_article_from_payload,
 )
+from app.services.content_extraction import ExtractionError
 from app.services.source_processing import (
     build_draft_preview,
     create_source_document,
@@ -90,6 +95,77 @@ def root():
     return {"message": "DHL KB Automation API is running"}
 
 
+def _build_rpa_ingest_response(
+    *,
+    source_document: SourceDocument | None = None,
+    article: KBArticle | None = None,
+    message: str | None = None,
+) -> RPAIngestResponse:
+    status_value = "failed"
+    processing_id: str | None = None
+    source_document_id: str | None = None
+    duplicate_of_source_id: str | None = None
+    article_id: str | None = None
+    requires_editor_review = False
+
+    if source_document is not None:
+        processing_id = str(source_document.id)
+        source_document_id = str(source_document.id)
+        duplicate_of_source_id = (
+            str(source_document.duplicate_of_source_id)
+            if source_document.duplicate_of_source_id
+            else None
+        )
+        requires_editor_review = source_document.requires_editor_review or bool(
+            article and article.requires_editor_review
+        )
+        status_value = source_document.processing_status.value
+        if article is not None and status_value != "duplicate":
+            article_id = str(article.id)
+
+    if status_value not in {"created", "duplicate", "needs_editor_review", "failed"}:
+        status_value = "failed"
+
+    if message is None:
+        if status_value == "created":
+            message = "Draft article created"
+        elif status_value == "duplicate":
+            message = "Duplicate source detected"
+        elif status_value == "needs_editor_review":
+            message = "Draft article created and flagged for editor review"
+        else:
+            message = (source_document.processing_error if source_document else None) or "RPA ingestion failed"
+
+    return RPAIngestResponse(
+        status=status_value,
+        processing_id=processing_id,
+        article_id=article_id,
+        source_document_id=source_document_id,
+        duplicate_of_source_id=duplicate_of_source_id,
+        message=message,
+        requires_editor_review=requires_editor_review,
+    )
+
+
+def _pick_rpa_field(
+    field_name: str,
+    *,
+    form_data: dict | None,
+    query_params,
+) -> str | None:
+    form_value = form_data.get(field_name) if form_data else None
+    if isinstance(form_value, str) and form_value.strip():
+        return form_value.strip()
+
+    query_value = query_params.get(field_name)
+    if query_value is not None:
+        cleaned_query_value = query_value.strip()
+        if cleaned_query_value:
+            return cleaned_query_value
+
+    return None
+
+
 @app.post("/api/auth/login", response_model=LoginResponse)
 def login(payload: LoginRequest, db: Session = Depends(get_db)):
     user = db.scalar(
@@ -128,7 +204,7 @@ async def upload_source_document(
             file_bytes=file_bytes,
             uploaded_by=current_user.id,
         )
-    except RuntimeError as exc:
+    except (RuntimeError, ExtractionError) as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
     background_tasks.add_task(process_source_document, source_document.id)
@@ -136,6 +212,91 @@ async def upload_source_document(
         processing_id=str(source_document.id),
         processing_status=source_document.processing_status,
         processing_stage=source_document.processing_stage,
+    )
+
+
+@app.post("/api/rpa/ingest", response_model=RPAIngestResponse)
+async def rpa_ingest(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    form_data: dict | None = None
+    content_type = request.headers.get("content-type", "")
+    if content_type.startswith("multipart/form-data") or content_type.startswith("application/x-www-form-urlencoded"):
+        try:
+            form_data = dict(await request.form())
+        except Exception:
+            form_data = None
+
+    query_params = request.query_params
+    uploaded_file = form_data.get("file") if form_data else None
+    file_name = _pick_rpa_field("file_name", form_data=form_data, query_params=query_params)
+    source_path = _pick_rpa_field("source_path", form_data=form_data, query_params=query_params)
+    requested_file_path = _pick_rpa_field("file", form_data=form_data, query_params=query_params)
+    ingestion_method = _pick_rpa_field("ingestion_method", form_data=form_data, query_params=query_params) or "rpa"
+    rpa_run_id = _pick_rpa_field("rpa_run_id", form_data=form_data, query_params=query_params) or ""
+    detected_at = _pick_rpa_field("detected_at", form_data=form_data, query_params=query_params) or ""
+
+    file_bytes = b""
+    content_type = None
+    resolved_file_name = file_name or "uploaded_file"
+
+    if isinstance(uploaded_file, (UploadFile, StarletteUploadFile)):
+        file_bytes = await uploaded_file.read()
+        content_type = uploaded_file.content_type
+        resolved_file_name = file_name or uploaded_file.filename or "uploaded_file"
+    else:
+        local_file_path = requested_file_path or source_path
+        if local_file_path:
+            path = Path(local_file_path)
+            if path.is_file():
+                file_bytes = path.read_bytes()
+                resolved_file_name = file_name or path.name
+                source_path = source_path or str(path)
+            else:
+                return _build_rpa_ingest_response(
+                    message=f"Readable local file was not found at '{local_file_path}'"
+                )
+        else:
+            return _build_rpa_ingest_response(
+                message="No uploaded file or readable local file path was provided"
+            )
+
+    if not file_bytes:
+        return _build_rpa_ingest_response(message="Uploaded file is empty")
+
+    processing_metadata = {
+        "rpa_run_id": rpa_run_id,
+        "source_path": source_path,
+        "detected_at": detected_at,
+        "requested_ingestion_method": ingestion_method,
+    }
+
+    try:
+        source_document = create_source_document(
+            db,
+            filename=resolved_file_name,
+            content_type=content_type,
+            file_bytes=file_bytes,
+            uploaded_by=None,
+            ingestion_method="rpa",
+            log_metadata=processing_metadata,
+        )
+    except (RuntimeError, ExtractionError) as exc:
+        return _build_rpa_ingest_response(message=str(exc))
+
+    await run_in_threadpool(process_source_document, source_document.id, processing_metadata)
+    db.expire_all()
+
+    processed_source_document = db.get(SourceDocument, source_document.id)
+    article = (
+        get_generated_article(processed_source_document.id, db)
+        if processed_source_document is not None
+        else None
+    )
+    return _build_rpa_ingest_response(
+        source_document=processed_source_document,
+        article=article,
     )
 
 
