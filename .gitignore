@@ -143,3 +143,13 @@ temp/
 *.local
 
 report.md
+
+# ------------------------------------------------------------------------------
+# RPA workspace runtime files
+# Keep the workspace folder structure, but ignore all generated contents.
+# ------------------------------------------------------------------------------
+rpa_workspace/**
+!rpa_workspace/
+!rpa_workspace/**/
+!rpa_workspace/.gitkeep
+!rpa_workspace/**/.gitkeep

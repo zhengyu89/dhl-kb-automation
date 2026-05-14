@@ -1,5 +1,0 @@
-POD upload failed again 😓
-Error msg: “File size too large”
-Just compress the image before uploading.
-JPEG works better than PNG.
-After upload, refresh screen twice.
