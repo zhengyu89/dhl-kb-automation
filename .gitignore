@@ -141,3 +141,5 @@ temp/
 *.tmp
 *.temp
 *.local
+
+report.md

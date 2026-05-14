@@ -1,0 +1,26 @@
+RE: Invoice mismatch issue
+To teamhelpdeskDAC@dhl.com
+
+Hi Team, 
+
+The invoice total does not match because fuel surcharge was applied twice. 
+
+Steps done: 
+1. Open invoice in SAP 
+2. Remove duplicated surcharge line 
+3. Recalculate tax 
+4. Save and resend to customer via email. Please remind teams not to manually add fuel surcharge. 
+
+Thanks & Regards,
+Siva
+Team Manager - DAC
+DHL Global Finance Services – Asia Pacific
+Level 11, Imazium, No. 8, Jalan SS21/37, Damansara Uptown
+47400 Petaling Jaya, Selangor Darul Ehsan
+Malaysia
+Phone: +60378416499
+
+sivanesan.letchumanan@dhl.com
+www.dhl.com
+
+# In format of .msg [OutlookFile.msg.15]

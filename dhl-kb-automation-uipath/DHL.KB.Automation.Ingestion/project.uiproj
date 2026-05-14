@@ -1,0 +1,6 @@
+{
+  "Name": "DHL.KB.Automation.Ingestion",
+  "ProjectType": "Process",
+  "Description": "RPA ingestion workflow for DHL Knowledge Base Automation",
+  "MainFile": "Main.xaml"
+}

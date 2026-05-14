@@ -1,0 +1,6 @@
+Customer address invalid.
+Team chat says postcode missing.
+Fix:
+Add postcode manually,
+Revalidate address,
+Save and continue booking.

@@ -1,0 +1,22 @@
+﻿{
+  "ApiBaseUrl": "http://localhost:8000",
+  "RpaIngestEndpoint": "/api/rpa/ingest",
+
+  "SourceFolder": "D:\\UTM\\Y3S2\\Webtech\\dhl-kb-automation-uipath\\dhl-kb-rpa-demo\\input",
+  "ProcessedFolder": "D:\\UTM\\Y3S2\\Webtech\\dhl-kb-automation-uipath\\dhl-kb-rpa-demo\\processed",
+  "DuplicateFolder": "D:\\UTM\\Y3S2\\Webtech\\dhl-kb-automation-uipath\\dhl-kb-rpa-demo\\duplicate",
+  "FailedFolder": "D:\\UTM\\Y3S2\\Webtech\\dhl-kb-automation-uipath\\dhl-kb-rpa-demo\\failed",
+  "ReviewNeededFolder": "D:\\UTM\\Y3S2\\Webtech\\dhl-kb-automation-uipath\\dhl-kb-rpa-demo\\review-needed",
+  "ScreenshotFolder": "D:\\UTM\\Y3S2\\Webtech\\dhl-kb-automation-uipath\\dhl-kb-rpa-demo\\screenshots",
+  "LogFolder": "D:\\UTM\\Y3S2\\Webtech\\dhl-kb-automation-uipath\\dhl-kb-rpa-demo\\logs",
+
+  "SummaryEmailTo": "tanzhengyu@graduate.utm.my",
+  "SummaryEmailCc": "",
+
+  "MaxItemsPerRun": 10,
+  "RetryCount": 2,
+  "RetryDelaySeconds": 3,
+  "RequestTimeoutSeconds": 60,
+
+  "AllowedExtensions": ".txt,.pdf,.docx,.jpg,.jpeg,.png"
+}

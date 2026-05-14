@@ -1,0 +1,6 @@
+Label not printing properly.
+Usually printer cache issue.
+Restart printer service,
+Clear queue,
+Reprint label.
+If still blur, change toner.
