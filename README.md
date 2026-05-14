@@ -1,7 +1,12 @@
 # DHL Knowledge Base Automation
+<p align="center">
+  <img src="./docs/DHL KnowledgeOps.png" alt="How DHL Knowledge Base Automation works" />
+</p>
+<p align="center">
+  AI-assisted knowledge capture for DHL logistics operations.  
+Built as a project for the <b>UTM × DHL Asia Pacific Shared Services Digital Automation Challenge 3.0. </b>
+</p>
 
-> AI-assisted knowledge capture for DHL logistics operations.  
-> Built as a project for the **UTM × DHL Asia Pacific Shared Services Digital Automation Challenge 3.0**.
 
 <p align="center">
   <a href="./docs/system_design.md"><strong>System Design</strong></a> ·
@@ -53,10 +58,12 @@ The current build already demonstrates the core end-to-end workflow. Production-
 - Accept automated ingestion through `POST /api/rpa/ingest`
 
 ## 🧭 How It Works
-
+DHL KnowledgeOps.png
 <p align="center">
   <img src="./docs/HowItWorks.png" alt="How DHL Knowledge Base Automation works" />
 </p>
+
+
 
 ### Architecture at a glance
 
