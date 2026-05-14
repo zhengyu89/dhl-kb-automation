@@ -1,4 +1,4 @@
-<Activity mc:Ignorable="sap sap2010" x:Class="Main" VisualBasic.Settings="{x:Null}" sap2010:WorkflowViewState.IdRef="ActivityBuilder_1" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<Activity mc:Ignorable="sap sap2010" x:Class="Main" VisualBasic.Settings="{x:Null}" sap2010:WorkflowViewState.IdRef="ActivityBuilder_1" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <TextExpression.NamespacesForImplementation>
     <sco:Collection x:TypeArguments="x:String">
       <x:String>System.Activities</x:String>
@@ -23,10 +23,14 @@
       <x:String>UiPath.Core</x:String>
       <x:String>UiPath.Core.Activities</x:String>
       <x:String>System.Windows.Markup</x:String>
-      <x:String>GlobalVariablesNamespace</x:String>
-      <x:String>GlobalConstantsNamespace</x:String>
       <x:String>System.Reflection</x:String>
       <x:String>System.Runtime.Serialization</x:String>
+      <x:String>System.ComponentModel</x:String>
+      <x:String>System.Xml.Serialization</x:String>
+      <x:String>System.Linq.Expressions</x:String>
+      <x:String>GlobalVariablesNamespace</x:String>
+      <x:String>GlobalConstantsNamespace</x:String>
+      <x:String>System.Numerics</x:String>
     </sco:Collection>
   </TextExpression.NamespacesForImplementation>
   <TextExpression.ReferencesForImplementation>
@@ -64,6 +68,26 @@
       <AssemblyReference>System.Private.DataContractSerialization</AssemblyReference>
       <AssemblyReference>System.Runtime.Serialization.Formatters</AssemblyReference>
       <AssemblyReference>System.Runtime.Serialization.Primitives</AssemblyReference>
+      <AssemblyReference>System.ComponentModel</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.EventBasedAsync</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.Primitives</AssemblyReference>
+      <AssemblyReference>System.Private.Xml</AssemblyReference>
+      <AssemblyReference>System.Memory.Data</AssemblyReference>
+      <AssemblyReference>UiPath.Excel.Activities.Design</AssemblyReference>
+      <AssemblyReference>System.Console</AssemblyReference>
+      <AssemblyReference>System.Security.Permissions</AssemblyReference>
+      <AssemblyReference>System.Configuration.ConfigurationManager</AssemblyReference>
+      <AssemblyReference>System.Memory</AssemblyReference>
+      <AssemblyReference>System.Private.Uri</AssemblyReference>
+      <AssemblyReference>System.Linq.Async</AssemblyReference>
+      <AssemblyReference>NPOI.Core</AssemblyReference>
+      <AssemblyReference>System.Collections</AssemblyReference>
+      <AssemblyReference>System.Collections.NonGeneric</AssemblyReference>
+      <AssemblyReference>System.Linq.Expressions</AssemblyReference>
+      <AssemblyReference>System.CodeDom</AssemblyReference>
+      <AssemblyReference>Microsoft.VisualBasic.Forms</AssemblyReference>
+      <AssemblyReference>Microsoft.VisualBasic.Core</AssemblyReference>
+      <AssemblyReference>System.Runtime.Numerics</AssemblyReference>
     </sco:Collection>
   </TextExpression.ReferencesForImplementation>
   <sap:WorkflowViewStateService.ViewState>
@@ -71,15 +95,106 @@
       <x:Boolean x:Key="ShouldExpandAll">True</x:Boolean>
     </scg:Dictionary>
   </sap:WorkflowViewStateService.ViewState>
-  <Sequence DisplayName="Main Sequence" sap:VirtualizedContainerService.HintSize="1287,621.6566666666666" sap2010:WorkflowViewState.IdRef="Sequence_1">
+  <Sequence DisplayName="Main Sequence" sap:VirtualizedContainerService.HintSize="522.8000000000001,1671.2" sap2010:WorkflowViewState.IdRef="Sequence_1">
     <Sequence.Variables>
-      <Variable x:TypeArguments="x:String" Name="RunId" />
-      <Variable x:TypeArguments="s:DateTime" Name="RunStartTime" />
+      <Variable x:TypeArguments="x:String" Name="variable1" />
+      <Variable x:TypeArguments="scg:List(x:String)" Name="AllowedExtensions" />
+      <Variable x:TypeArguments="s:DateTime" Name="DetectedAt" />
+      <Variable x:TypeArguments="x:String" Name="ScreenshotPath" />
+      <Variable x:TypeArguments="x:String" Name="DestinationPath" />
+      <Variable x:TypeArguments="x:String" Name="BackendMessage" />
+      <Variable x:TypeArguments="x:String" Name="DuplicateOfSourceId" />
+      <Variable x:TypeArguments="x:String" Name="SourceDocumentId" />
+      <Variable x:TypeArguments="x:String" Name="ArticleId" />
+      <Variable x:TypeArguments="x:String" Name="ProcessingId" />
+      <Variable x:TypeArguments="x:String" Name="ApiResponseStatus" />
+      <Variable x:TypeArguments="x:String" Name="ApiResponseText" />
+      <Variable x:TypeArguments="x:String" Name="CurrentExtension" />
+      <Variable x:TypeArguments="x:String" Name="CurrentFileName" />
+      <Variable x:TypeArguments="x:String" Name="CurrentFilePath" />
     </Sequence.Variables>
     <sap:WorkflowViewStateService.ViewState>
       <scg:Dictionary x:TypeArguments="x:String, x:Object">
         <x:Boolean x:Key="IsExpanded">True</x:Boolean>
       </scg:Dictionary>
     </sap:WorkflowViewStateService.ViewState>
+    <ui:InvokeWorkflowFile ArgumentsVariable="{x:Null}" DisplayName="Init_Config - Invoke Workflow File (Init_Config.xaml)" sap:VirtualizedContainerService.HintSize="451.2,176" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_1" UnSafe="False" WorkflowFileName="Init_Config.xaml">
+      <ui:InvokeWorkflowFile.Arguments>
+        <InOutArgument x:TypeArguments="scg:Dictionary(x:String, x:String)" x:Key="Config">[GlobalVariablesNamespace.GlobalVariables.Config]</InOutArgument>
+      </ui:InvokeWorkflowFile.Arguments>
+    </ui:InvokeWorkflowFile>
+    <ui:InvokeWorkflowFile ArgumentsVariable="{x:Null}" DisplayName="Scan_Source_Folder - Invoke Workflow File (Scan_Source_Folder.xaml)" sap:VirtualizedContainerService.HintSize="451.2,176" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_2" UnSafe="False" WorkflowFileName="Scan_Source_Folder.xaml">
+      <ui:InvokeWorkflowFile.Arguments>
+        <OutArgument x:TypeArguments="s:String[]" x:Key="AllFiles">[AllFiles]</OutArgument>
+        <InArgument x:TypeArguments="scg:Dictionary(x:String, x:String)" x:Key="Config">[GlobalVariablesNamespace.GlobalVariables.Config]</InArgument>
+        <OutArgument x:TypeArguments="x:Int32" x:Key="TotalDetected">[TotalDetected]</OutArgument>
+      </ui:InvokeWorkflowFile.Arguments>
+    </ui:InvokeWorkflowFile>
+    <ui:InvokeWorkflowFile ArgumentsVariable="{x:Null}" DisplayName="Filter_Eligible_Files - Invoke Workflow File (Filter_Eligible_Files.xaml)" sap:VirtualizedContainerService.HintSize="451.2,176" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_3" UnSafe="False" WorkflowFileName="Filter_Eligible_Files.xaml">
+      <ui:InvokeWorkflowFile.Arguments>
+        <OutArgument x:TypeArguments="scg:List(x:String)" x:Key="EligibleFiles">[EligibleFiles]</OutArgument>
+        <InArgument x:TypeArguments="s:String[]" x:Key="AllFiles">[AllFiles]</InArgument>
+        <InArgument x:TypeArguments="scg:Dictionary(x:String, x:String)" x:Key="Config">[Config]</InArgument>
+      </ui:InvokeWorkflowFile.Arguments>
+    </ui:InvokeWorkflowFile>
+    <ui:MessageBox Caption="{x:Null}" ChosenButton="{x:Null}" AutoCloseAfter="00:00:00" DisplayName="Message Box" sap:VirtualizedContainerService.HintSize="451.2,122.4" sap2010:WorkflowViewState.IdRef="MessageBox_1" Text="[&quot;Total detected: &quot; + TotalDetected.ToString + vbCrLf +&#xD;&#xA;&quot;Eligible files: &quot; + EligibleFiles.Count.ToString]" />
+    <ui:ForEach x:TypeArguments="x:String" CurrentIndex="{x:Null}" DisplayName="For Each filePath" sap:VirtualizedContainerService.HintSize="451.2,884" sap2010:WorkflowViewState.IdRef="ForEach`1_1" Values="[EligibleFiles]">
+      <ui:ForEach.Body>
+        <ActivityAction x:TypeArguments="x:String">
+          <ActivityAction.Argument>
+            <DelegateInArgument x:TypeArguments="x:String" Name="filePath" />
+          </ActivityAction.Argument>
+          <Sequence DisplayName="Body" sap:VirtualizedContainerService.HintSize="449.6,753.6" sap2010:WorkflowViewState.IdRef="Sequence_2">
+            <sap:WorkflowViewStateService.ViewState>
+              <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+              </scg:Dictionary>
+            </sap:WorkflowViewStateService.ViewState>
+            <Assign sap:VirtualizedContainerService.HintSize="416,174.4" sap2010:WorkflowViewState.IdRef="Assign_1">
+              <Assign.To>
+                <OutArgument x:TypeArguments="x:String">[CurrentFilePath]</OutArgument>
+              </Assign.To>
+              <Assign.Value>
+                <InArgument x:TypeArguments="x:String">[filePath]</InArgument>
+              </Assign.Value>
+            </Assign>
+            <ui:InvokeWorkflowFile ArgumentsVariable="{x:Null}" DisplayName="Send_To_FastAPI - Invoke Workflow File (Send_To_FastAPI.xaml)" sap:VirtualizedContainerService.HintSize="416,176" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_4" UnSafe="False" WorkflowFileName="Send_To_FastAPI.xaml">
+              <ui:InvokeWorkflowFile.Arguments>
+                <OutArgument x:TypeArguments="x:Int32" x:Key="ApiStatusCode" />
+                <OutArgument x:TypeArguments="x:String" x:Key="ApiResponseText">[ApiResponseText]</OutArgument>
+                <InArgument x:TypeArguments="x:String" x:Key="RunId">[RunId]</InArgument>
+                <InArgument x:TypeArguments="x:String" x:Key="CurrentFilePath">[CurrentFilePath]</InArgument>
+                <InArgument x:TypeArguments="scg:Dictionary(x:String, x:String)" x:Key="Config">[Config]</InArgument>
+              </ui:InvokeWorkflowFile.Arguments>
+            </ui:InvokeWorkflowFile>
+            <ui:InvokeWorkflowFile ArgumentsVariable="{x:Null}" DisplayName="Handle_Backend_Result - Invoke Workflow File (Handle_Backend_Result.xaml)" sap:VirtualizedContainerService.HintSize="416,176" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_7" UnSafe="False" WorkflowFileName="Handle_Backend_Result.xaml">
+              <ui:InvokeWorkflowFile.Arguments>
+                <OutArgument x:TypeArguments="x:String" x:Key="BackendMessage">[BackendMessage]</OutArgument>
+                <OutArgument x:TypeArguments="x:String" x:Key="DuplicateOfSourceId">[DuplicateOfSourceId]</OutArgument>
+                <OutArgument x:TypeArguments="x:String" x:Key="SourceDocumentId">[SourceDocumentId]</OutArgument>
+                <OutArgument x:TypeArguments="x:String" x:Key="ArticleId">[ArticleId]</OutArgument>
+                <OutArgument x:TypeArguments="x:String" x:Key="ProcessingId">[ProcessingId]</OutArgument>
+                <OutArgument x:TypeArguments="x:String" x:Key="ApiResponseStatus">[ApiResponseStatus]</OutArgument>
+                <InArgument x:TypeArguments="x:String" x:Key="ApiResponseText">[ApiResponseText]</InArgument>
+              </ui:InvokeWorkflowFile.Arguments>
+            </ui:InvokeWorkflowFile>
+            <ui:InvokeWorkflowFile ArgumentsVariable="{x:Null}" DisplayName="Route_File - Invoke Workflow File (Route_File.xaml)" sap:VirtualizedContainerService.HintSize="416,167.2" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_8" UnSafe="False" WorkflowFileName="Route_File.xaml">
+              <ui:InvokeWorkflowFile.Arguments>
+                <InOutArgument x:TypeArguments="scg:List(x:String)" x:Key="SummaryRows">[SummaryRows]</InOutArgument>
+                <InOutArgument x:TypeArguments="x:String" x:Key="FailedCount" />
+                <InOutArgument x:TypeArguments="x:String" x:Key="NeedReviewCount" />
+                <InOutArgument x:TypeArguments="x:String" x:Key="DuplicatedCount" />
+                <InOutArgument x:TypeArguments="x:String" x:Key="CreatedCount" />
+                <InArgument x:TypeArguments="x:String" x:Key="BackendMessage">[BackendMessage]</InArgument>
+                <InArgument x:TypeArguments="x:String" x:Key="ApiResponseStatus">[ApiResponseStatus]</InArgument>
+                <InArgument x:TypeArguments="scg:Dictionary(x:String, x:String)" x:Key="Config">[Config]</InArgument>
+                <InArgument x:TypeArguments="x:String" x:Key="CurrentFilePath">[CurrentFilePath]</InArgument>
+              </ui:InvokeWorkflowFile.Arguments>
+            </ui:InvokeWorkflowFile>
+          </Sequence>
+        </ActivityAction>
+      </ui:ForEach.Body>
+    </ui:ForEach>
+    <ui:MessageBox Caption="{x:Null}" ChosenButton="{x:Null}" AutoCloseAfter="00:00:00" DisplayName="Message Box" sap:VirtualizedContainerService.HintSize="451.2,113.6" sap2010:WorkflowViewState.IdRef="MessageBox_3" Text="[&quot;Run completed&quot; + vbCrLf +&#xD;&#xA;&quot;Total detected: &quot; + TotalDetected.ToString + vbCrLf +&#xD;&#xA;&quot;Eligible: &quot; + EligibleFiles.Count.ToString + vbCrLf +&#xD;&#xA;&quot;Created: &quot; + CreatedCount.ToString + vbCrLf +&#xD;&#xA;&quot;Duplicate: &quot; + DuplicateCount.ToString + vbCrLf +&#xD;&#xA;&quot;Need review: &quot; + NeedReviewCount.ToString + vbCrLf +&#xD;&#xA;&quot;Failed: &quot; + FailedCount.ToString]" />
   </Sequence>
 </Activity>
