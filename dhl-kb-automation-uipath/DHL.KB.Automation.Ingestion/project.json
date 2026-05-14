@@ -4,6 +4,7 @@
   "description": "RPA ingestion workflow for DHL Knowledge Base Automation",
   "main": "Main.xaml",
   "dependencies": {
+    "UiPath.Excel.Activities": "[3.5.1]",
     "UiPath.Mail.Activities": "[2.8.10]",
     "UiPath.System.Activities": "[26.2.4]",
     "UiPath.UIAutomation.Activities": "[26.4.0-preview]",
