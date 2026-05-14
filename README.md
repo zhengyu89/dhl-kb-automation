@@ -1,84 +1,98 @@
 # DHL Knowledge Base Automation
 
-AI-assisted knowledge capture for DHL logistics operations. This project turns messy operational inputs like emails, screenshots, chat exports, troubleshooting notes, and SOP drafts into structured knowledge base articles that can be edited, reviewed, versioned, and published through a web app.
+> AI-assisted knowledge capture for DHL logistics operations.  
+> Built as a project for the **UTM × DHL Asia Pacific Shared Services Digital Automation Challenge 3.0**.
 
-## Overview
+<p align="center">
+  <a href="./docs/system_design.md"><strong>System Design</strong></a> ·
+  <a href="./docs/module_breakdown.md"><strong>Module Breakdown</strong></a> ·
+  <a href="./docs/uipath_setup_guide.md"><strong>UiPath Setup Guide</strong></a> ·
+  <a href="./docs/systemRequirement.md"><strong>System Requirements</strong></a> ·
+  <a href="./docs/DHL%20Automation%20Report.pdf"><strong>Project Report</strong></a>
+</p>
 
-Operations knowledge is often buried in scattered formats and informal messages. This system centralizes that process by combining:
+<p align="center">
+  <img alt="Frontend React 19" src="https://img.shields.io/badge/Frontend-React%2019-61DAFB?style=flat-square&logo=react&logoColor=black">
+  <img alt="Backend FastAPI" src="https://img.shields.io/badge/Backend-FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white">
+  <img alt="Database PostgreSQL" src="https://img.shields.io/badge/Database-PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white">
+  <img alt="OCR EasyOCR" src="https://img.shields.io/badge/OCR-EasyOCR-1F2937?style=flat-square">
+  <img alt="Automation UiPath" src="https://img.shields.io/badge/Automation-UiPath-FA4616?style=flat-square">
+  <img alt="AI OpenAI Agents SDK" src="https://img.shields.io/badge/AI-OpenAI%20Agents%20SDK-111827?style=flat-square">
+  <img alt="Challenge UTM x DHL" src="https://img.shields.io/badge/Challenge-UTM%20%C3%97%20DHL%20DAP%203.0-D40511?style=flat-square">
+</p>
 
-- A React frontend for upload, editing, review, and knowledge browsing
-- A FastAPI backend for ingestion, extraction, article management, and workflow state
-- PostgreSQL for persistent storage
-- EasyOCR for image and screenshot text extraction
-- OpenAI Agents SDK for structured draft generation on shorter inputs
-- Heuristic long-document preservation for large SOP-style content
-- UiPath integration design for future automated ingestion
+## 🌟 Highlights
 
-## What The System Does
+- Turns messy operations inputs into structured draft knowledge base articles.
+- Supports `.txt`, `.pdf`, `.docx`, `.eml`, `.msg`, and common image formats.
+- Combines a React frontend, FastAPI backend, PostgreSQL, EasyOCR, and OpenAI Agents SDK.
+- Keeps humans in control with editor/reviewer roles, version history, and publish workflow.
+- Includes a UiPath ingestion flow for automated routing into `processed`, `duplicate`, `review-needed`, and `failed` buckets.
+- Still works without an OpenAI key by falling back to heuristic draft generation.
 
-The current app supports an end-to-end draft workflow:
+## ℹ️ Overview
 
-- Sign in with role-based demo accounts
-- Upload source files such as `.txt`, `.pdf`, `.docx`, `.eml`, `.msg`, and image formats
-- Poll backend processing status after upload
+Operations knowledge is often buried in email threads, screenshots, chat exports, troubleshooting notes, and half-finished SOPs. This project centralizes that messy information and turns it into structured, reviewable knowledge base content.
+
+The system accepts raw source files, extracts text, runs OCR when needed, generates a draft article, and sends that draft through editing, review, versioning, and publishing inside a web app. UiPath is designed to stay thin: it submits files, reads the backend result, and routes the source file to the correct folder while FastAPI owns the real business logic.
+
+The current build already demonstrates the core end-to-end workflow. Production-oriented extensions such as deeper admin monitoring, Supabase deployment targets, and richer RPA reporting are documented in the project docs.
+
+## 🚀 What This Project Can Do
+
+- Role-based login with seeded demo users for admin, reviewer, and editor flows
+- Upload source documents and poll processing status from the frontend
 - Extract text from documents, emails, and screenshots
-- Generate a structured draft article with title, summary, description, steps, sections, and keywords
-- Flag OCR-heavy or ambiguous content for editor review
-- Edit drafts in the frontend
-- Submit articles for review
-- Approve, reject, request changes, or publish as reviewer/admin
-- Track version history for each article
-- Search articles across drafts, review items, and published content
+- Use EasyOCR for image-heavy inputs
+- Generate structured `KBArticleDraft` content with OpenAI when configured
+- Preserve large SOP-style inputs with heuristic long-document handling
+- Flag ambiguous or OCR-heavy content for editor review
+- Edit drafts, submit for review, approve, reject, request changes, and publish
+- Track article version history for traceability
+- Search across draft, review, and published knowledge content
+- Accept automated ingestion through `POST /api/rpa/ingest`
 
-## Workflow
+## 🧭 How It Works
 
-1. An editor uploads a source document.
-2. The backend stores the file and creates a processing record.
-3. Text is extracted from the file, with EasyOCR used for image-based inputs.
-4. Short inputs are structured into `KBArticleDraft` JSON using OpenAI Agents SDK when configured.
-5. Long inputs skip full LLM restructuring and preserve the original content with local heuristics.
-6. A draft article is created and shown in the frontend.
-7. Editors refine the draft and submit it for review.
-8. Reviewers approve, reject, return to draft, or publish the article.
+<p align="center">
+  <img src="./docs/HowItWorks.png" alt="How DHL Knowledge Base Automation works" />
+</p>
 
-## Implemented Modules
+### Architecture at a glance
 
-- Authentication with seeded demo users
-- Upload console with status polling
-- Source extraction and OCR pipeline
-- AI-assisted article draft generation
-- Draft editing and version tracking
-- Review and publishing transitions
-- Searchable article list and knowledge viewer
+<p align="center">
+  <img src="./docs/architecture.png" alt="DHL Knowledge Base Automation architecture diagram" />
+</p>
 
-Planned or partial areas are documented in [docs/module_breakdown.md](docs/module_breakdown.md) and [docs/system_design.md](docs/system_design.md).
+## 🎬 Quick Demo
 
-## Tech Stack
+### Frontend flow
 
-- Frontend: React 19, TypeScript, Vite, Tailwind CSS 4, shadcn/ui
-- Backend: FastAPI, SQLAlchemy, Pydantic, `uv`
-- Database: PostgreSQL
-- OCR: EasyOCR
-- AI: OpenAI Agents SDK
-- Automation: UiPath workflow design
+1. Start the backend and frontend.
+2. Sign in as `Editor1 / editor123`.
+3. Upload one of the sample files from [`docs/data_source`](./docs/data_source).
+4. Wait for the processing status to become `created` or `needs_editor_review`.
+5. Open the generated draft, refine it, and submit it for review.
+6. Sign in as `Reviewer1 / reviewer123` to approve and publish the article.
 
-## Repository Structure
+### RPA/API flow
 
-```text
-frontend/   React application for upload, draft editing, review, and KB browsing
-backend/    FastAPI API, services, schemas, database models, and tests
-docs/       System design, module planning, requirements, and source samples
-dev.ps1     Starts backend and frontend in separate PowerShell windows
+You can simulate a UiPath-style ingestion call with a single command:
+
+```powershell
+curl.exe -X POST -F "file=@docs/data_source/Error_Code_AUTH_401.txt" http://localhost:8000/api/rpa/ingest
 ```
 
-## Local Development
+## ⬇️ Installation
 
 ### Prerequisites
 
 - Node.js and npm
 - Python 3.12+
-- `uv`
-- PostgreSQL running locally
+- [`uv`](https://docs.astral.sh/uv/)
+- PostgreSQL
+- Windows + UiPath Studio if you want to run the RPA workflow locally
+- Optional: `OPENAI_API_KEY` for AI-assisted draft structuring
 
 ### 1. Configure the backend
 
@@ -86,9 +100,10 @@ From the `backend` folder:
 
 ```powershell
 Copy-Item .env.example .env
+uv sync
 ```
 
-Update `.env` with your local database credentials and optional OpenAI key.
+Create a PostgreSQL database named `dhl_kb_automation`, or update `.env` to point at an existing database.
 
 Important settings:
 
@@ -98,8 +113,9 @@ Important settings:
 - `DB_PORT`
 - `DB_NAME`
 - `OPENAI_API_KEY` optional
+- `OPENAI_MODEL_NAME` optional, defaults to `gpt-5.4-nano`
 
-If `OPENAI_API_KEY` is not set, the backend falls back to heuristic draft generation.
+If `OPENAI_API_KEY` is not set, the backend falls back to heuristic generation and long-document preservation mode.
 
 ### 2. Start the backend
 
@@ -108,11 +124,12 @@ cd backend
 uv run uvicorn app.main:app --reload
 ```
 
-API default URL:
+The backend will create tables on startup, ensure the local schema is up to date, and seed the demo users automatically.
 
-```text
-http://localhost:8000
-```
+Default URLs:
+
+- API: `http://localhost:8000`
+- FastAPI docs: `http://localhost:8000/docs`
 
 ### 3. Start the frontend
 
@@ -122,29 +139,35 @@ npm install
 npm run dev
 ```
 
-Frontend default URL:
+Frontend URL:
 
-```text
-http://localhost:5173
-```
+- App: `http://localhost:5173`
 
 ### 4. Start both with the helper script
 
-From the repo root:
+After the backend and frontend dependencies have been installed once, run this from the repository root:
 
 ```powershell
 .\dev.ps1
 ```
 
-## Demo Accounts
+This opens the backend and frontend in separate PowerShell windows.
 
-The backend seeds local demo users on startup:
+### Demo accounts
 
-- `Admin1 / admin123`
-- `Reviewer1 / reviewer123`
-- `Editor1 / editor123`
+| Role | Login | Password |
+| --- | --- | --- |
+| Admin | `Admin1` | `admin123` |
+| Reviewer | `Reviewer1` | `reviewer123` |
+| Editor | `Editor1` | `editor123` |
 
-## Testing
+### Platform notes
+
+- The web app is the main working demo path for the challenge submission.
+- The UiPath workflow lives in [`dhl-kb-automation-uipath`](./dhl-kb-automation-uipath).
+- The first OCR-heavy run may download EasyOCR model files into local storage.
+
+## 🧪 Testing
 
 Run backend tests from the `backend` directory:
 
@@ -152,29 +175,44 @@ Run backend tests from the `backend` directory:
 uv run pytest
 ```
 
-Useful test docs:
+Useful test references:
 
-- [backend/tests/README.md](backend/tests/README.md)
+- [`backend/tests/README.md`](./backend/tests/README.md)
+- [`backend/tests/test_upload_processing.py`](./backend/tests/test_upload_processing.py)
+- [`backend/tests/test_article_generation_management.py`](./backend/tests/test_article_generation_management.py)
+- [`backend/tests/test_ai_article_generation_management.py`](./backend/tests/test_ai_article_generation_management.py)
 
-Some integration tests are optional and require environment flags:
+Optional integration flags:
 
 - `RUN_REAL_OPENAI_TESTS=1`
 - `RUN_REAL_OCR_TESTS=1`
 
-## Notes On AI And OCR Behavior
+## 🗂️ Repository Structure
 
-- Shorter documents can be structured with OpenAI Agents SDK into a validated `KBArticleDraft`
-- Long documents above the configured threshold use heuristic preservation instead of full AI restructuring
-- OCR-based inputs are more likely to be marked for editor review
-- Every article change creates a new version snapshot for traceability
+```text
+frontend/                    React app for upload, editing, review, and KB browsing
+backend/                     FastAPI API, services, database models, and tests
+dhl-kb-automation-uipath/    UiPath ingestion workflow
+docs/                        Design docs, requirements, report, and sample data
+rpa_workspace/               Input/output folders used by the automation flow
+dev.ps1                      Starts backend and frontend in separate terminals
+```
 
-## Project Documents
+## 📚 Project Documents
 
-- [docs/system_design.md](docs/system_design.md)
-- [docs/module_breakdown.md](docs/module_breakdown.md)
-- [docs/systemRequirement.md](docs/systemRequirement.md)
-- [docs/uipath_setup_guide.md](docs/uipath_setup_guide.md)
+- [`docs/system_design.md`](./docs/system_design.md): architecture, processing ownership, and UiPath boundaries
+- [`docs/module_breakdown.md`](./docs/module_breakdown.md): feature modules, APIs, and implementation roadmap
+- [`docs/systemRequirement.md`](./docs/systemRequirement.md): challenge requirements and project objective
+- [`docs/uipath_setup_guide.md`](./docs/uipath_setup_guide.md): local setup notes for the RPA workflow
+- [`docs/DHL Automation Report.pdf`](./docs/DHL%20Automation%20Report.pdf): report material for the challenge submission
 
-## Current Scope
+## 💭 Feedback And Contribution
 
-This repository already demonstrates the core upload-to-draft-to-review workflow. It is also structured to support a fuller DHL operations automation story, including richer admin monitoring, deeper RPA ingestion, and production deployment targets such as Supabase-backed infrastructure.
+If you are reviewing this project, feedback is especially useful around:
+
+- article quality and structure
+- OCR accuracy and review-flag behavior
+- UiPath handoff and folder-routing workflow
+- reviewer experience and publishing flow
+
+Contributions, refinements, and challenge feedback are welcome through the usual issue or pull request workflow for this repository.
