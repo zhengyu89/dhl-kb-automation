@@ -18,12 +18,13 @@ from app.core.auth import (
     verify_password,
 )
 from app.core.config import settings
-from app.db.models import AppUser, Attachment, KBArticle, OCRResult, SourceDocument, UserRole
-from app.db.session import Base, SessionLocal, engine, get_db
+from app.db.models import AppUser, ArticleStatus, Attachment, KBArticle, OCRResult, SourceDocument, UserRole
+from app.db.session import Base, SessionLocal, engine, ensure_database_schema_up_to_date, get_db
 from app.schemas.api import (
     AttachmentSummary,
     ArticleDetail,
     ArticleListItem,
+    ArticleStatusTransitionPayload,
     ArticleUpdatePayload,
     ArticleVersionSummary,
     DraftPreview,
@@ -35,10 +36,13 @@ from app.schemas.api import (
 )
 from app.services.article_management import (
     article_select_for_user,
+    delete_article,
     get_article_for_user,
+    get_article_source_references,
     get_article_versions,
     serialize_article_detail,
     serialize_article_list_item,
+    transition_article_status,
     update_article_from_payload,
 )
 from app.services.source_processing import (
@@ -53,6 +57,7 @@ from app.services.source_processing import (
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     Base.metadata.create_all(bind=engine)
+    ensure_database_schema_up_to_date()
     ensure_storage_directory()
     db = SessionLocal()
     try:
@@ -224,6 +229,8 @@ def list_articles(
             if q_lower in article.title.lower()
             or q_lower in (article.summary or "").lower()
             or q_lower in article.kind.lower()
+            or any(q_lower in keyword.lower() for keyword in (article.keywords or []))
+            or any(q_lower in reference.lower() for reference in get_article_source_references(db, article.id))
         ]
 
     return [serialize_article_list_item(db, article) for article in articles]
@@ -250,7 +257,7 @@ def get_article(
 def update_article(
     article_id: str,
     payload: ArticleUpdatePayload,
-    current_user: AppUser = Depends(require_roles(UserRole.editor, UserRole.admin)),
+    current_user: AppUser = Depends(require_roles(UserRole.editor, UserRole.reviewer, UserRole.admin)),
     db: Session = Depends(get_db),
 ):
     try:
@@ -263,6 +270,149 @@ def update_article(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Article not found")
 
     update_article_from_payload(db, article=article, payload=payload, actor=current_user)
+    db.commit()
+    db.refresh(article)
+    return serialize_article_detail(db, article)
+
+
+def _load_article_for_transition(
+    db: Session,
+    article_id: str,
+    current_user: AppUser,
+) -> KBArticle:
+    try:
+        article_uuid = uuid.UUID(article_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Article not found") from exc
+
+    article = get_article_for_user(db, article_uuid, current_user)
+    if article is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Article not found")
+    return article
+
+
+@app.delete("/api/articles/{article_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_article_endpoint(
+    article_id: str,
+    current_user: AppUser = Depends(require_roles(UserRole.admin)),
+    db: Session = Depends(get_db),
+):
+    article = _load_article_for_transition(db, article_id, current_user)
+    delete_article(db, article=article)
+    db.commit()
+    return None
+
+
+@app.post("/api/articles/{article_id}/submit-review", response_model=ArticleDetail)
+def submit_article_for_review(
+    article_id: str,
+    payload: ArticleStatusTransitionPayload | None = None,
+    current_user: AppUser = Depends(require_roles(UserRole.editor, UserRole.admin)),
+    db: Session = Depends(get_db),
+):
+    article = _load_article_for_transition(db, article_id, current_user)
+    if article.status not in {ArticleStatus.draft, ArticleStatus.rejected}:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Only draft or rejected articles can be submitted")
+
+    transition_article_status(
+        db,
+        article=article,
+        actor=current_user,
+        status=ArticleStatus.submitted,
+        change_note=(payload.change_note if payload else None) or "Submitted for reviewer approval",
+    )
+    db.commit()
+    db.refresh(article)
+    return serialize_article_detail(db, article)
+
+
+@app.post("/api/articles/{article_id}/approve", response_model=ArticleDetail)
+def approve_article(
+    article_id: str,
+    payload: ArticleStatusTransitionPayload | None = None,
+    current_user: AppUser = Depends(require_roles(UserRole.reviewer, UserRole.admin)),
+    db: Session = Depends(get_db),
+):
+    article = _load_article_for_transition(db, article_id, current_user)
+    if article.status not in {ArticleStatus.submitted, ArticleStatus.rpa_submitted}:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Only submitted articles can be approved")
+
+    transition_article_status(
+        db,
+        article=article,
+        actor=current_user,
+        status=ArticleStatus.reviewed,
+        change_note=(payload.change_note if payload else None) or "Approved by reviewer",
+    )
+    db.commit()
+    db.refresh(article)
+    return serialize_article_detail(db, article)
+
+
+@app.post("/api/articles/{article_id}/publish", response_model=ArticleDetail)
+def publish_article(
+    article_id: str,
+    payload: ArticleStatusTransitionPayload | None = None,
+    current_user: AppUser = Depends(require_roles(UserRole.reviewer, UserRole.admin)),
+    db: Session = Depends(get_db),
+):
+    article = _load_article_for_transition(db, article_id, current_user)
+    if article.status not in {ArticleStatus.submitted, ArticleStatus.rpa_submitted, ArticleStatus.reviewed}:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Only submitted or reviewed articles can be published")
+
+    transition_article_status(
+        db,
+        article=article,
+        actor=current_user,
+        status=ArticleStatus.published,
+        change_note=(payload.change_note if payload else None) or "Published directly from review queue",
+    )
+    db.commit()
+    db.refresh(article)
+    return serialize_article_detail(db, article)
+
+
+@app.post("/api/articles/{article_id}/reject", response_model=ArticleDetail)
+def reject_article(
+    article_id: str,
+    payload: ArticleStatusTransitionPayload | None = None,
+    current_user: AppUser = Depends(require_roles(UserRole.reviewer, UserRole.admin)),
+    db: Session = Depends(get_db),
+):
+    article = _load_article_for_transition(db, article_id, current_user)
+    if article.status not in {ArticleStatus.submitted, ArticleStatus.rpa_submitted, ArticleStatus.reviewed}:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Only review-stage articles can be rejected")
+
+    transition_article_status(
+        db,
+        article=article,
+        actor=current_user,
+        status=ArticleStatus.rejected,
+        change_note=(payload.change_note if payload else None) or "Rejected by reviewer",
+    )
+    db.commit()
+    db.refresh(article)
+    return serialize_article_detail(db, article)
+
+
+@app.post("/api/articles/{article_id}/request-changes", response_model=ArticleDetail)
+def request_article_changes(
+    article_id: str,
+    payload: ArticleStatusTransitionPayload | None = None,
+    current_user: AppUser = Depends(require_roles(UserRole.reviewer, UserRole.admin)),
+    db: Session = Depends(get_db),
+):
+    article = _load_article_for_transition(db, article_id, current_user)
+    if article.status not in {ArticleStatus.submitted, ArticleStatus.rpa_submitted, ArticleStatus.reviewed, ArticleStatus.rejected}:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Only review-stage articles can be returned to draft")
+
+    transition_article_status(
+        db,
+        article=article,
+        actor=current_user,
+        status=ArticleStatus.draft,
+        change_note=(payload.change_note if payload else None) or "Returned to draft for changes",
+    )
     db.commit()
     db.refresh(article)
     return serialize_article_detail(db, article)

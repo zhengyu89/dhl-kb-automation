@@ -2,41 +2,67 @@
 
 ## 1. Purpose
 
-This document explains what can be set up in UiPath for the DHL AI-Powered Knowledge Base Automation project.
+This guide aligns UiPath with the latest system design in:
 
-It is written to support:
+- [system_design.md](/d:/UTM/Y3S2/Webtech/dhl-kb-automation/docs/system_design.md)
+- [systemRequirement.md](/d:/UTM/Y3S2/Webtech/dhl-kb-automation/docs/systemRequirement.md)
 
-- Module 8: RPA Integration
-- Module 10: Database and environment setup alignment
-- Module 11: Testing and demo preparation
+UiPath is a lightweight ingestion layer for the DHL Knowledge Base Automation platform. It should detect incoming source material, submit it to the FastAPI backend, track the result, and notify operators. It should not own extraction, OCR, AI generation, article authoring, approval logic, or direct database writes.
 
-The goal is to keep UiPath focused on ingestion and operational logging, while FastAPI remains responsible for extraction, OCR orchestration, duplicate detection, AI generation, and database writes.
+## 2. UiPath Role in the Latest Design
 
-## 2. What UiPath Should Do in This Project
+### 2.1 What UiPath Should Do
 
-UiPath should be responsible for:
+UiPath is responsible for:
 
-- Watching a folder, shared drive, or exported mailbox location for new source files
-- Picking up eligible files such as `.txt`, `.pdf`, `.docx`, `.jpg`, `.png`, and message exports
-- Sending file or text payloads to the FastAPI backend
-- Receiving the backend result
-- Recording whether the result was `created`, `duplicate`, or `failed`
-- Capturing screenshots when a processing failure happens
-- Sending a summary email after a run
+1. Detecting new files from a watched folder, exported mailbox folder, or shared-drive sync location.
+2. Filtering eligible source files such as `.txt`, `.pdf`, `.docx`, `.jpg`, `.jpeg`, `.png`, and exported email files.
+3. Sending file or text payloads to the FastAPI backend.
+4. Receiving the backend processing result.
+5. Logging whether the item was created, marked duplicate, flagged for review, or failed.
+6. Capturing screenshots when the automation itself fails.
+7. Sending a run summary email.
 
-UiPath should not be responsible for:
+### 2.2 What UiPath Must Not Do
 
-- Writing directly into PostgreSQL
-- Running OCR itself
-- Calling ChatGPT directly
-- Deciding whether an article is publishable
-- Bypassing the editor and reviewer workflow
+UiPath must not:
 
-## 3. Recommended UiPath Components To Set Up
+1. Write directly into PostgreSQL or Supabase.
+2. Run OCR itself.
+3. Call OpenAI directly.
+4. Generate final SOP or article content.
+5. Decide whether content is publishable.
+6. Bypass the editor and reviewer lifecycle.
+7. Update article records except through the backend API.
 
-### 3.1 UiPath Studio Project
+This boundary matches the latest architecture rule:
 
-Create one UiPath Studio project for this automation, for example:
+- UiPath detects and sends.
+- FastAPI processes and stores.
+- EasyOCR extracts image text.
+- OpenAI Agents SDK structures short content.
+- Human users review and publish.
+
+## 3. End-to-End RPA Flow
+
+The current target flow is:
+
+1. UiPath scans a configured folder or exported mailbox location.
+2. UiPath detects a new eligible file.
+3. UiPath sends the file to FastAPI.
+4. FastAPI stores the file, extracts text, hashes content, checks duplicates, runs OCR when needed, and generates the draft.
+5. FastAPI returns a result such as `created`, `duplicate`, `failed`, or `needs_editor_review`.
+6. UiPath logs the outcome and moves the file to the correct folder.
+7. UiPath captures an automation screenshot if its own processing step fails.
+8. UiPath sends a summary email after the run.
+
+This follows the RPA ingestion workflow in the latest system design and keeps FastAPI as the owner of business logic.
+
+## 4. Recommended UiPath Project Structure
+
+### 4.1 UiPath Studio Project
+
+Create one UiPath Studio project, for example:
 
 - `DHL.KB.Automation.Ingestion`
 
@@ -45,15 +71,47 @@ Recommended workflow files:
 - `Main.xaml`
 - `Init_Config.xaml`
 - `Scan_Source_Folder.xaml`
-- `Validate_File.xaml`
+- `Filter_Eligible_Files.xaml`
+- `Build_Ingest_Request.xaml`
 - `Send_To_FastAPI.xaml`
-- `Handle_Result.xaml`
+- `Handle_Backend_Result.xaml`
+- `Route_File.xaml`
 - `Capture_Failure_Screenshot.xaml`
 - `Send_Summary_Email.xaml`
 
-### 3.2 Configuration File
+### 4.2 Suggested Transaction Variables
 
-Create a config file that UiPath can read at runtime.
+Keep the workflow simple and consistent with the backend response model.
+
+Suggested run-level variables:
+
+- `RunId`
+- `RunStartTime`
+- `RunEndTime`
+- `TotalDetected`
+- `CreatedCount`
+- `DuplicateCount`
+- `NeedsReviewCount`
+- `FailedCount`
+
+Suggested item-level variables:
+
+- `CurrentFilePath`
+- `CurrentFileName`
+- `CurrentExtension`
+- `DetectedAt`
+- `ApiResponseStatus`
+- `ProcessingId`
+- `ArticleId`
+- `SourceDocumentId`
+- `DuplicateOfSourceId`
+- `BackendMessage`
+
+## 5. Configuration to Prepare
+
+### 5.1 Local Config File or Orchestrator Assets
+
+Use a config file for local development and move the same settings into Orchestrator assets later if available.
 
 Suggested keys:
 
@@ -63,100 +121,87 @@ Suggested keys:
 - `ProcessedFolder`
 - `DuplicateFolder`
 - `FailedFolder`
+- `ReviewNeededFolder`
 - `ScreenshotFolder`
+- `ArchiveFolder`
 - `SummaryEmailTo`
 - `SummaryEmailCc`
 - `MaxItemsPerRun`
 - `RetryCount`
 - `RetryDelaySeconds`
+- `RequestTimeoutSeconds`
 - `AllowedExtensions`
 
-Recommended local development values:
+Recommended development values:
 
 - `ApiBaseUrl = http://localhost:8000`
 - `RpaIngestEndpoint = /api/rpa/ingest`
 
-### 3.3 Local Source Folders
+### 5.2 Folder Layout
 
-Set up local or network folders for file movement:
+Set up these working folders:
 
 - `input/`
 - `processed/`
 - `duplicate/`
 - `failed/`
+- `review-needed/`
 - `screenshots/`
 - `archive/`
 
-Suggested behavior:
+Suggested usage:
 
-- New items start in `input/`
-- Successfully created items move to `processed/`
-- Duplicates move to `duplicate/`
-- Failed items move to `failed/`
-- Error screenshots go to `screenshots/`
+- `input/`: new files waiting for UiPath pickup
+- `processed/`: files successfully accepted by FastAPI
+- `duplicate/`: files that match the backend duplicate rule
+- `failed/`: files that could not be processed successfully
+- `review-needed/`: optional holding area for files whose backend result is `needs_editor_review`
+- `screenshots/`: screenshots from UiPath exception handling
+- `archive/`: optional long-term retention area
 
-### 3.4 Orchestrator Assets or Modern Folders
+## 6. Backend Contract UiPath Should Target
 
-If UiPath Orchestrator is available, store runtime settings there instead of hardcoding values.
+### 6.1 Primary Endpoint
 
-Good candidates for assets:
-
-- API base URL
-- email recipients
-- source folder path
-- API auth token if required later
-- environment name such as `dev`, `uat`, or `prod`
-
-Use separate Orchestrator folders or separate asset sets for:
-
-- development
-- testing
-- production
-
-## 4. How UiPath Should Interact With This System
-
-### 4.1 Ingestion Flow
-
-Recommended flow:
-
-1. Read the configured source folder.
-2. Filter files by allowed extension.
-3. For each file, gather file name, path, extension, and created time.
-4. Send the file to FastAPI.
-5. Read the API response.
-6. Move the file based on the response status.
-7. Log the result in the run summary.
-8. Capture screenshot and error details if the request fails.
-
-### 4.2 FastAPI Request
-
-UiPath should call:
+UiPath should submit files to:
 
 - `POST /api/rpa/ingest`
 
-Suggested request content:
+Important design note:
 
-- multipart upload for files
-- metadata fields such as source path, ingestion method, and run ID
+- In `system_design.md`, this endpoint is currently marked as `Planned`.
+- UiPath setup should therefore target this contract, but the backend must implement it before end-to-end RPA testing can be completed.
 
-Suggested metadata fields:
+### 6.2 Request Shape
 
+UiPath should send a multipart/form-data request for file-based ingestion.
+
+Suggested request parts:
+
+- uploaded file
 - `file_name`
 - `source_path`
 - `ingestion_method = rpa`
 - `rpa_run_id`
 - `detected_at`
 
-### 4.3 Expected Backend Response
+If the source is already available as text rather than a file export, include:
 
-UiPath should be prepared to handle responses such as:
+- `raw_text`
+- `source_reference`
+
+The backend should still remain responsible for storing the source and deciding the final `source_type`.
+
+### 6.3 Response Handling
+
+UiPath should be ready for these backend outcomes:
 
 - `created`
 - `duplicate`
 - `failed`
 - `needs_editor_review`
 
-Suggested response fields UiPath should log:
+UiPath should log these response fields when available:
 
 - `status`
 - `processing_id`
@@ -164,190 +209,244 @@ Suggested response fields UiPath should log:
 - `source_document_id`
 - `duplicate_of_source_id`
 - `message`
+- `requires_editor_review`
 
-## 5. What To Prepare In Module 10 For UiPath Compatibility
+### 6.4 Meaning of Each Result
 
-Module 10 is mainly about database and environment setup, but there are a few things that should be prepared so UiPath can work cleanly with the backend.
+#### `created`
 
-### 5.1 Local Development Environment
+Meaning:
 
-Set up:
+- FastAPI successfully created a draft article record.
 
-- FastAPI running locally
-- PostgreSQL running on localhost
-- a development database such as `dhl_kb_automation`
-- environment variables for FastAPI pointing to localhost PostgreSQL
+UiPath action:
 
-Recommended local database connection target:
+- increment `CreatedCount`
+- move the file to `processed/`
 
-- `postgresql+psycopg2://postgres:postgres@localhost:5432/dhl_kb_automation`
+Backend note:
 
-UiPath should call the local FastAPI API only.
-UiPath should not connect directly to PostgreSQL.
+- manual uploads normally create article status `draft`
+- successful RPA ingestion may create article status `rpa_submitted`, unless review flags force a safer path
 
-### 5.2 Database Tables That Support UiPath
+#### `duplicate`
 
-Module 10 should prepare these tables for future UiPath integration:
+Meaning:
 
-- `rpa_runs`
-- `rpa_run_items`
-- `source_documents`
-- `system_logs`
-- `attachments`
+- FastAPI detected the source as a duplicate using normalized text or file hashing with the 14-day lookback rule.
 
-These tables allow the backend to:
+UiPath action:
 
-- record an RPA run
-- record each file processed in that run
-- store source-document metadata
-- store duplicate and failure information
-- store screenshot or attachment references
+- increment `DuplicateCount`
+- move the file to `duplicate/`
 
-### 5.3 Storage Structure
+#### `needs_editor_review`
 
-Module 10 should also prepare storage locations for:
+Meaning:
 
-- uploaded source files
-- failure screenshots
-- run logs
+- the backend processed the item, but OCR ambiguity, AI ambiguity, or long-document preservation requires human review
 
-If Supabase Storage is used later, recommended logical buckets are:
+UiPath action:
 
-- `source-documents`
-- `rpa-screenshots`
-- `rpa-logs`
+- increment `NeedsReviewCount`
+- move the file to `review-needed/` or `processed/`, depending on your operating preference
 
-For local development before full Supabase wiring, keep the folder naming aligned with those same concepts.
+Design note:
 
-## 6. Suggested UiPath Workflow Design
+- this aligns with the `processing_status` enum in the latest design
+- OCR-derived content must be reviewed before publication
+- long-document heuristic preservation also sets `requires_editor_review = true`
 
-### 6.1 Main Sequence
+#### `failed`
 
-- Initialize config
-- Start run log
-- Scan folder
-- For each file:
-- validate file
-- send to backend
-- parse result
-- route file
-- add run summary entry
-- if failed, capture screenshot
-- send summary email
-- end run log
+Meaning:
 
-### 6.2 Decision Rules
+- FastAPI could not complete the processing flow
 
-If backend returns `created`:
+UiPath action:
 
-- mark item as created
+- increment `FailedCount`
+- move the file to `failed/`
+- record the returned error message
+
+## 7. Recommended UiPath Workflow Logic
+
+### 7.1 Main Sequence
+
+1. Initialize config and summary counters.
+2. Generate a `RunId`.
+3. Scan the configured input folder.
+4. Filter for allowed extensions.
+5. Limit items if `MaxItemsPerRun` is configured.
+6. Loop through files one by one.
+7. Build and send the API request.
+8. Parse the backend response.
+9. Route the file according to result.
+10. Add the item to the summary log.
+11. On UiPath-side exception, capture screenshot and continue when safe.
+12. Send summary email.
+13. End the run.
+
+### 7.2 Decision Rules
+
+If FastAPI returns `created`:
+
+- record success
 - move file to `processed/`
 
-If backend returns `duplicate`:
+If FastAPI returns `duplicate`:
 
-- mark item as duplicate
+- record duplicate
 - move file to `duplicate/`
 
-If backend returns `needs_editor_review`:
+If FastAPI returns `needs_editor_review`:
 
-- mark item as created with review flag
-- move file to `processed/` or a dedicated `review-needed/` folder
+- record review-required
+- move file to `review-needed/` or `processed/`
 
-If backend returns `failed`:
+If FastAPI returns `failed`:
+
+- record failure
+- move file to `failed/`
+
+If UiPath itself throws an exception before a valid response:
 
 - capture screenshot
-- move file to `failed/`
-- store error message
+- record local automation failure
+- move file to `failed/` if retry is exhausted
 
-## 7. Logging and Monitoring Setup
+## 8. Logging and Monitoring Alignment
 
-UiPath should maintain a run-level summary containing:
+### 8.1 What UiPath Should Log
+
+UiPath should maintain a run summary with:
 
 - run start time
 - run end time
 - total files detected
 - created count
 - duplicate count
+- needs-review count
 - failed count
 - list of failed file names
 
-Suggested item-level fields:
+UiPath should maintain item-level details with:
 
 - file name
 - source path
 - detected time
-- API response status
+- API status
 - processing ID
-- article ID if created
-- duplicate reference if duplicate
-- error message if failed
+- article ID if returned
+- duplicate reference if returned
+- error message if returned
 
-## 8. Summary Email Setup
+### 8.2 What the Backend Already Owns
 
-Set up an email step that sends a compact run report after each automation cycle.
+According to the latest system design, the backend is responsible for storing and auditing:
 
-Suggested email sections:
+- `source_documents`
+- `attachments`
+- `ocr_results`
+- `ai_generation_runs`
+- `system_logs`
+- `article_versions`
+- article status and structured content
 
-- total items scanned
-- created items
-- duplicates
-- failed items
-- list of filenames by result
-- screenshots attached for failures if needed
+Important refinement from the latest design:
 
-Suggested subject line:
+- do not assume `rpa_runs` or `rpa_run_items` tables exist
+- they are not part of the current system design schema
+- keep UiPath run logging operational on the UiPath side unless the backend later adds dedicated RPA run tables or logging endpoints
+
+## 9. Summary Email Design
+
+UiPath should send one compact email after each run.
+
+Suggested subject:
 
 - `DHL KB Automation RPA Summary - {RunDateTime}`
 
-## 9. Exception Handling Setup
+Suggested content:
 
-UiPath should handle at least these cases:
+- total items scanned
+- created count
+- duplicate count
+- needs-review count
+- failed count
+- filenames by result group
+- brief error list for failed items
+
+Optional attachments:
+
+- local run log export
+- failure screenshots when relevant
+
+This satisfies the requirement that the RPA process sends an execution summary to the system admin.
+
+## 10. Exception Handling Rules
+
+UiPath should handle these cases at minimum:
 
 - source folder not reachable
 - file locked by another process
 - unsupported extension
-- FastAPI unavailable
+- FastAPI service unavailable
 - request timeout
-- API returns `500`
-- malformed API response
+- backend `500` error
+- malformed or incomplete API response
 
 Recommended handling:
 
-- retry transient failures
-- capture error details
-- take screenshot where useful
-- continue processing remaining files when safe
-- include failures in summary email
+1. retry transient failures based on `RetryCount` and `RetryDelaySeconds`
+2. record the exception details
+3. capture a screenshot when the failure is within the UiPath workflow or desktop interaction
+4. continue processing remaining files when safe
+5. include all failed items in the summary email
 
-## 10. Local Development Checklist
+Important boundary:
 
-Before testing UiPath locally, make sure these are ready:
+- screenshots are for UiPath operational troubleshooting
+- backend processing failures should still be treated as backend outcomes returned by the API
 
-- PostgreSQL is running on localhost
-- the `dhl_kb_automation` database exists
-- FastAPI starts successfully against localhost PostgreSQL
-- the `POST /api/rpa/ingest` endpoint is available
-- test source files exist in the input folder
-- UiPath config points to `http://localhost:8000`
+## 11. Local Development Checklist
 
-## 11. Recommended Future Enhancements
+Before running UiPath locally, make sure:
 
-Later, the UiPath setup can be improved with:
+1. PostgreSQL is running on localhost.
+2. the project database is available.
+3. FastAPI starts successfully.
+4. the backend file storage path is writable.
+5. `POST /api/rpa/ingest` has been implemented or mocked.
+6. test files exist in `input/`.
+7. UiPath config points to `http://localhost:8000`.
 
-- mailbox monitoring instead of only folder monitoring
-- queue-based processing through Orchestrator
-- separate retry queue for transient failures
-- scheduled unattended runs
-- dashboard integration for run metrics
-- attachment of failure screenshots into centralized storage
+Practical note:
 
-## 12. Practical Boundary Rule
+- if `/api/rpa/ingest` is still unimplemented, UiPath workflow development can still proceed using a stubbed response or Postman-tested mock contract
 
-The cleanest rule for this project is:
+## 12. Alignment With Functional Requirements
 
-- UiPath detects and sends
-- FastAPI processes and stores
-- PostgreSQL keeps system records
-- human users review and publish
+This refined UiPath setup supports the documented requirements by ensuring that UiPath can:
 
-That separation will keep the automation simpler, easier to debug, and consistent with the module design already documented in this project.
+- ingest files from a designated folder or exported mailbox source
+- rely on backend duplicate checks using a 14-day lookback
+- create content through the web application backend rather than directly in the database
+- record failures and take screenshots
+- send an execution summary email with created, duplicate, review-required, and failed totals
+
+It also stays aligned with the latest design constraints:
+
+- FastAPI owns extraction, OCR orchestration, duplicate detection, AI generation, article creation, and versioning
+- UiPath stays intentionally thin and operational
+- all articles still go through human review before publication
+
+## 13. Final Boundary Rule
+
+Use this as the implementation rule of thumb:
+
+- UiPath handles detection, submission, routing, and run reporting.
+- FastAPI handles extraction, hashing, OCR, AI structuring, persistence, and article lifecycle creation.
+- Editors and reviewers handle validation, approval, and publication.
+
+That separation is the latest approved design and should be kept intact during implementation and demo preparation.

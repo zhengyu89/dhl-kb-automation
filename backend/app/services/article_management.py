@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import re
 import uuid
+from datetime import UTC, datetime
 from typing import Iterable
 
 from sqlalchemy import Select, delete, select
 from sqlalchemy.orm import Session
 
 from app.db.models import (
+    AIGenerationRun,
     AppUser,
     ArticleKeyword,
     ArticleSource,
@@ -102,7 +104,13 @@ def update_article_from_payload(
     payload: ArticleUpdatePayload,
     actor: AppUser,
 ) -> KBArticle:
-    structured_content = KBArticleDraft.model_validate(payload.model_dump(exclude={"change_note"}))
+    payload_data = payload.model_dump(exclude={"change_note"})
+    payload_data["requires_editor_review"] = article.requires_editor_review
+    structured_content = KBArticleDraft.model_validate(payload_data)
+    structured_content_data = structured_content.model_dump()
+
+    if structured_content_data == article.structured_content:
+        return article
 
     article.kind = structured_content.kind.value
     article.title = structured_content.title
@@ -112,8 +120,7 @@ def update_article_from_payload(
     article.steps = [step.model_dump() for step in structured_content.steps]
     article.sections = [section.model_dump() for section in structured_content.sections]
     article.keywords = structured_content.keywords
-    article.structured_content = structured_content.model_dump()
-    article.requires_editor_review = structured_content.requires_editor_review
+    article.structured_content = structured_content_data
     article.updated_by = actor.id
     article.current_version_no += 1
 
@@ -126,6 +133,45 @@ def update_article_from_payload(
     )
     db.flush()
     return article
+
+
+def transition_article_status(
+    db: Session,
+    *,
+    article: KBArticle,
+    actor: AppUser,
+    status: ArticleStatus,
+    change_note: str,
+) -> KBArticle:
+    article.status = status
+    article.updated_by = actor.id
+
+    if status in {ArticleStatus.reviewed, ArticleStatus.rejected, ArticleStatus.draft}:
+        article.reviewed_by = actor.id
+        article.reviewed_at = datetime.now(UTC)
+
+    if status == ArticleStatus.published:
+        article.published_by = actor.id
+        article.published_at = datetime.now(UTC)
+
+    article.current_version_no += 1
+    create_article_version(
+        db,
+        article=article,
+        created_by=actor.id,
+        change_note=change_note,
+    )
+    db.flush()
+    return article
+
+
+def delete_article(db: Session, *, article: KBArticle) -> None:
+    db.execute(delete(AIGenerationRun).where(AIGenerationRun.article_id == article.id))
+    db.execute(delete(ArticleKeyword).where(ArticleKeyword.article_id == article.id))
+    db.execute(delete(ArticleSource).where(ArticleSource.article_id == article.id))
+    db.execute(delete(ArticleVersion).where(ArticleVersion.article_id == article.id))
+    db.delete(article)
+    db.flush()
 
 
 def create_article_version(

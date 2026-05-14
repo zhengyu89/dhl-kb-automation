@@ -16,14 +16,7 @@ export type SourceType =
   | 'image'
   | 'chat_screenshot'
   | 'rpa_import'
-export type DraftSourceType =
-  | 'text'
-  | 'email'
-  | 'chat_screenshot'
-  | 'image'
-  | 'pdf'
-  | 'docx'
-  | 'unknown'
+export type DraftSourceType = 'text' | 'email' | 'image' | 'pdf' | 'docx' | 'unknown'
 export type ArticleStatus =
   | 'draft'
   | 'submitted'
@@ -32,8 +25,7 @@ export type ArticleStatus =
   | 'published'
   | 'rejected'
   | 'archived'
-export type ArticleType = 'sop' | 'troubleshooting' | 'checklist' | 'faq' | 'policy' | 'general'
-export type ConfidenceLevel = 'high' | 'medium' | 'low'
+export type ArticleKind = 'sop' | 'article'
 
 export type UserProfile = {
   id: string
@@ -81,83 +73,38 @@ export type OCRResultSummary = {
   extracted_text: string
 }
 
-export type ResolutionStep = {
+export type ArticleStep = {
   step_no: number
   instruction: string
-  expected_result?: string | null
 }
 
-export type ProcedureStep = {
-  step_no: number
-  action: string
-  owner?: string | null
-  system?: string | null
-  expected_result?: string | null
-}
-
-export type ChecklistItem = {
-  item_no: number
-  item: string
-  required: boolean
-}
-
-export type FAQItem = {
-  question: string
-  answer: string
-}
-
-export type EscalationRule = {
-  condition: string
-  action: string
-  owner?: string | null
-}
-
-export type RelatedSystem = {
-  name: string
-  purpose?: string | null
-}
-
-export type SourceQuality = {
-  confidence: ConfidenceLevel
-  missing_information: string[]
-  assumptions: string[]
-  requires_editor_review: boolean
+export type ArticleSection = {
+  heading: string
+  content: string
 }
 
 export type KBArticleDraft = {
   schema_version: '1.0'
   title: string
+  kind: ArticleKind
   summary: string
-  article_type: ArticleType
+  description: string
+  steps: ArticleStep[]
+  sections: ArticleSection[]
+  keywords: string[]
   source_reference: string
   source_type: DraftSourceType
-  applies_to: string[]
-  related_systems: RelatedSystem[]
-  problem_statement: string | null
-  error_code: string | null
-  symptoms: string[]
-  root_cause: string | null
-  resolution_steps: ResolutionStep[]
-  purpose: string | null
-  scope: string | null
-  prerequisites: string[]
-  procedure_steps: ProcedureStep[]
-  checklist_items: ChecklistItem[]
-  faq_items: FAQItem[]
-  escalation_rules: EscalationRule[]
-  notes: string[]
-  tags: string[]
-  source_quality: SourceQuality
+  requires_editor_review: boolean
 }
 
 export type DraftPreview = {
   title: string
   summary: string
-  article_type: string
+  kind: ArticleKind
   source_reference: string
   extracted_text_preview: string
-  tags: string[]
-  resolution_steps: ResolutionStep[]
+  keywords: string[]
+  steps: ArticleStep[]
 }
 
 export type AttachmentSummary = {
@@ -172,13 +119,13 @@ export type ArticleListItem = {
   id: string
   title: string
   summary: string | null
-  article_type: string
+  kind: ArticleKind
   status: ArticleStatus
   created_via: string
   requires_editor_review: boolean
   current_version_no: number
   source_references: string[]
-  tags: string[]
+  keywords: string[]
   created_at: string
   updated_at: string
 }
@@ -187,17 +134,17 @@ export type ArticleDetail = {
   id: string
   title: string
   summary: string | null
-  article_type: string
+  kind: ArticleKind
   status: ArticleStatus
   created_via: string
   requires_editor_review: boolean
   current_version_no: number
-  problem_statement: string | null
-  root_cause: string | null
-  resolution_steps: ResolutionStep[]
+  description: string | null
+  steps: ArticleStep[]
+  sections: ArticleSection[]
   structured_content: KBArticleDraft
   source_references: string[]
-  tags: string[]
+  keywords: string[]
   created_at: string
   updated_at: string
   created_by: string | null
@@ -217,6 +164,10 @@ export type ArticleVersionSummary = {
 }
 
 export type ArticleUpdatePayload = KBArticleDraft & {
+  change_note?: string | null
+}
+
+export type ArticleStatusTransitionPayload = {
   change_note?: string | null
 }
 
@@ -271,6 +222,30 @@ export function getArticle(articleId: string) {
 
 export function updateArticle(articleId: string, payload: ArticleUpdatePayload) {
   return api.patch<ArticleDetail>(`/api/articles/${articleId}`, payload)
+}
+
+export function deleteArticle(articleId: string) {
+  return api.delete(`/api/articles/${articleId}`)
+}
+
+export function submitArticleForReview(articleId: string, payload?: ArticleStatusTransitionPayload) {
+  return api.post<ArticleDetail>(`/api/articles/${articleId}/submit-review`, payload ?? {})
+}
+
+export function approveArticle(articleId: string, payload?: ArticleStatusTransitionPayload) {
+  return api.post<ArticleDetail>(`/api/articles/${articleId}/approve`, payload ?? {})
+}
+
+export function publishArticle(articleId: string, payload?: ArticleStatusTransitionPayload) {
+  return api.post<ArticleDetail>(`/api/articles/${articleId}/publish`, payload ?? {})
+}
+
+export function rejectArticle(articleId: string, payload?: ArticleStatusTransitionPayload) {
+  return api.post<ArticleDetail>(`/api/articles/${articleId}/reject`, payload ?? {})
+}
+
+export function requestArticleChanges(articleId: string, payload?: ArticleStatusTransitionPayload) {
+  return api.post<ArticleDetail>(`/api/articles/${articleId}/request-changes`, payload ?? {})
 }
 
 export function getArticleVersions(articleId: string) {

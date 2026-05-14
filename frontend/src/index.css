@@ -6,33 +6,37 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: 240 14% 97%;
-  --foreground: 240 10% 3.9%;
+  --background: 220 12% 96%;
+  --foreground: 30 9% 9%;
 
   --card: 0 0% 100%;
-  --card-foreground: 240 10% 3.9%;
+  --card-foreground: 30 9% 9%;
+  --surface-muted: 220 14% 97%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 240 10% 3.9%;
+  --popover-foreground: 30 9% 9%;
 
-  --primary: 0 84% 45%;
-  --primary-foreground: 0 0% 100%;
+  --primary: 48 100% 50%;
+  --primary-foreground: 24 10% 8%;
 
-  --secondary: 48 96% 53%;
-  --secondary-foreground: 240 10% 3.9%;
+  --secondary: 45 88% 92%;
+  --secondary-foreground: 24 10% 12%;
 
-  --muted: 240 8% 94%;
-  --muted-foreground: 240 4% 42%;
+  --warning: 42 96% 52%;
+  --warning-foreground: 24 10% 8%;
 
-  --accent: 48 96% 53%;
-  --accent-foreground: 240 10% 3.9%;
+  --muted: 220 12% 88%;
+  --muted-foreground: 30 6% 42%;
 
-  --destructive: 0 84.2% 60.2%;
+  --accent: 48 100% 50%;
+  --accent-foreground: 24 10% 8%;
+
+  --destructive: 0 72% 48%;
   --destructive-foreground: 0 0% 98%;
 
-  --border: 240 8% 88%;
-  --input: 240 8% 88%;
-  --ring: 0 84% 45%;
+  --border: 220 10% 84%;
+  --input: 220 10% 84%;
+  --ring: 48 100% 44%;
 
   --chart-1: 0 84% 45%;
   --chart-2: 48 96% 53%;
@@ -40,14 +44,14 @@
   --chart-4: 240 10% 16%;
   --chart-5: 240 6% 72%;
 
-  --sidebar: 230 18% 12%;
+  --sidebar: 30 14% 9%;
   --sidebar-foreground: 0 0% 98%;
-  --sidebar-primary: 0 84% 45%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 230 16% 18%;
+  --sidebar-primary: 50 100% 50%;
+  --sidebar-primary-foreground: 30 9% 9%;
+  --sidebar-accent: 30 12% 17%;
   --sidebar-accent-foreground: 0 0% 98%;
-  --sidebar-border: 230 13% 24%;
-  --sidebar-ring: 48 96% 53%;
+  --sidebar-border: 30 10% 24%;
+  --sidebar-ring: 50 100% 50%;
 
   --radius: 0.75rem;
 
@@ -63,33 +67,37 @@
 }
 
 .dark {
-  --background: 240 10% 5%;
+  --background: 220 10% 10%;
   --foreground: 0 0% 98%;
 
-  --card: 240 10% 8%;
+  --card: 220 10% 14%;
   --card-foreground: 0 0% 98%;
+  --surface-muted: 220 10% 17%;
 
-  --popover: 240 10% 6%;
+  --popover: 220 10% 13%;
   --popover-foreground: 0 0% 98%;
 
-  --primary: 0 84% 50%;
-  --primary-foreground: 0 0% 100%;
+  --primary: 48 100% 52%;
+  --primary-foreground: 240 10% 3.9%;
 
-  --secondary: 48 96% 53%;
-  --secondary-foreground: 240 10% 3.9%;
+  --secondary: 0 72% 55%;
+  --secondary-foreground: 0 0% 98%;
 
-  --muted: 240 5% 13%;
+  --warning: 42 96% 52%;
+  --warning-foreground: 24 10% 8%;
+
+  --muted: 220 10% 18%;
   --muted-foreground: 240 5% 64.9%;
 
-  --accent: 48 96% 53%;
+  --accent: 48 100% 52%;
   --accent-foreground: 240 10% 3.9%;
 
-  --destructive: 0 62.8% 45%;
+  --destructive: 0 72% 55%;
   --destructive-foreground: 0 0% 98%;
 
-  --border: 240 5% 17%;
-  --input: 240 5% 17%;
-  --ring: 0 84% 50%;
+  --border: 220 8% 24%;
+  --input: 220 8% 24%;
+  --ring: 48 100% 52%;
 
   --chart-1: 0 84% 50%;
   --chart-2: 48 96% 53%;
@@ -99,8 +107,8 @@
 
   --sidebar: 230 18% 10%;
   --sidebar-foreground: 0 0% 98%;
-  --sidebar-primary: 0 84% 50%;
-  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-primary: 50 100% 50%;
+  --sidebar-primary-foreground: 240 10% 3.9%;
   --sidebar-accent: 230 16% 16%;
   --sidebar-accent-foreground: 0 0% 98%;
   --sidebar-border: 230 13% 22%;
@@ -121,6 +129,9 @@
   --color-sidebar-primary: hsl(var(--sidebar-primary));
   --color-sidebar-foreground: hsl(var(--sidebar-foreground));
   --color-sidebar: hsl(var(--sidebar));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-surface-muted: hsl(var(--surface-muted));
   --color-chart-5: hsl(var(--chart-5));
   --color-chart-4: hsl(var(--chart-4));
   --color-chart-3: hsl(var(--chart-3));
@@ -175,4 +186,30 @@
 
 #root {
   min-height: 100svh;
+}
+
+.app-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+
+.app-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.app-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-scrollbar::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: linear-gradient(180deg, hsl(var(--border)), hsl(var(--muted-foreground) / 0.55));
+  background-clip: padding-box;
+}
+
+.app-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, hsl(var(--muted-foreground) / 0.7), hsl(var(--foreground) / 0.3));
+  background-clip: padding-box;
 }

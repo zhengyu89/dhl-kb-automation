@@ -185,6 +185,18 @@ class ArticleUpdatePayload(KBArticleDraft):
         return cleaned or None
 
 
+class ArticleStatusTransitionPayload(BaseModel):
+    change_note: str | None = None
+
+    @field_validator("change_note")
+    @classmethod
+    def strip_change_note(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        cleaned = value.strip()
+        return cleaned or None
+
+
 class ProcessingStatusResponse(BaseModel):
     processing_id: str
     processing_status: ProcessingStatus
